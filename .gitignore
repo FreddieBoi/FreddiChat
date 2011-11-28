@@ -1,0 +1,9 @@
+*suo
+*Resharper*
+
+# Build Folders
+bin
+obj
+
+# mstest test results
+TestResults
