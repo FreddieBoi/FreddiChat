@@ -9,10 +9,10 @@ The source consists of two projects:
 + FreddiChatServer
 
 ### FreddiChatClient ###
-[FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github" is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
+[FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
 
 ### FreddiChatServer ###
-[FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github" is a console application. It currently doesn't provide any possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
+[FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It currently doesn't provide any possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
 
 Author
 ------
