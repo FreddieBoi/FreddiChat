@@ -4,9 +4,9 @@ FreddiChat is a chat client and server solution written in C# using WCF and WPF.
 
 Implementation
 --------------
-The source consists of two projects:
-+ FreddiChatClient
-+ FreddiChatServer
+The source consists of two projects
++ The client side implementation [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github")
++ The server side implementation [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github")
 
 ### FreddiChatClient ###
 [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
