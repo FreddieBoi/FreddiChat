@@ -333,6 +333,7 @@ namespace FreddiChatClient
                 _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
             }
         }
 
@@ -348,6 +349,7 @@ namespace FreddiChatClient
                 _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
             }
         }
 
@@ -405,6 +407,7 @@ namespace FreddiChatClient
                                 _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
                                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
                             }
                         }
                         return;
@@ -424,6 +427,7 @@ namespace FreddiChatClient
                 _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
             }
         }
 
@@ -503,6 +507,7 @@ namespace FreddiChatClient
                 _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", exception.Message, exception.InnerException != null ? exception.InnerException.Message : ""), Colors.Red)));
                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
             }
         }
 
