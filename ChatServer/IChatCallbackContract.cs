@@ -1,10 +1,9 @@
 ﻿using System;
 using System.ServiceModel;
 
-namespace FreddieChatServer
-{
-    public interface IChatCallbackContract
-    {
+namespace FreddieChatServer {
+
+    public interface IChatCallbackContract {
 
         [OperationContract(IsOneWay = true)]
         void OnConnect(DateTime dateTime, bool result, string message, string[] users);
@@ -34,4 +33,5 @@ namespace FreddieChatServer
         void OnKeepAlive(DateTime dateTime, bool result, string message);
 
     }
+
 }

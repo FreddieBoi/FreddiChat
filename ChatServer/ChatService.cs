@@ -1,156 +1,128 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
 using System.Timers;
 
-namespace FreddieChatServer
-{
+namespace FreddieChatServer {
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    class ChatService : IChatService
-    {
+    public class ChatService : IChatService {
 
-        private readonly Dictionary<string, IChatCallbackContract> _users = new Dictionary<string, IChatCallbackContract>();
+        private readonly Users users = new Users();
 
-        private readonly Timer _refreshUserListTimer = new Timer();
+        private readonly Timer refreshUserListTimer = new Timer();
 
-        public ChatService()
-        {
-            _refreshUserListTimer.Elapsed += OnRefreshUserListTimerElapsed;
+        public ChatService() {
+            refreshUserListTimer.Elapsed += OnRefreshUserListTimerElapsed;
             // Set the Interval to every 10 seconds.
-            _refreshUserListTimer.Interval = 10000;
-            _refreshUserListTimer.Enabled = true;
+            refreshUserListTimer.Interval = 10000;
+            refreshUserListTimer.Enabled = true;
         }
 
         #region IChatService members
 
-        public void Connect(string user)
-        {
-            Console.WriteLine("[{0}] Recieved Connect({1})", DateTime.Now, user);
+        public void Connect(string user) {
+            ConsoleUtils.TraceCall("Connect({0})", user);
 
             RefreshUserList();
 
-            var callbackContract = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
+            var currentUser = Users.Current;
 
-            string message;
-
-            if (_users.ContainsKey(user))
-            {
-                message = String.Format("Could not connect as {0}. A user with that name already exists!", user);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnConnect(false, {1}, null) to Unknown", DateTime.Now, message);
-                Console.ResetColor();
-                callbackContract.OnConnect(DateTime.Now, false, message, null);
+            if (currentUser.IsRegistered) {
+                var error = string.Format("Already connected as {0}!", currentUser.Name ?? "Unknown");
+                ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
+                currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
                 return;
             }
 
-            var comObj = ((ICommunicationObject)callbackContract);
-            if (comObj.State != CommunicationState.Opened)
-            {
-                message = String.Format("Could not connect. Connection not properly opened (state was {0}).", comObj.State.ToString().ToLower());
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnConnect(false, {1}, null) to Unknown", DateTime.Now, message);
-                Console.ResetColor();
-                callbackContract.OnConnect(DateTime.Now, false, message, null);
+            if (users.IsNameRegistered(user)) {
+                var error = String.Format("Could not connect as {0}. A user with that name already exists!", user);
+                ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
+                currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
                 return;
             }
 
-            _users.Add(user, callbackContract);
+            if (currentUser.State == null || currentUser.State != CommunicationState.Opened) {
+                var state = currentUser.State == null ? "not initialized" : currentUser.State.ToString().ToLower();
+                var error = String.Format("Could not connect. Connection not properly opened (state was {0}).", state);
+                ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
+                currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
+                return;
+            }
 
-            message = String.Format("Successfully connected as {0}.", user);
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[{0}] Sending  OnConnect(true, {1}, string[{2}]) to {3}", DateTime.Now, message, _users.Count, user);
-            Console.ResetColor();
+            currentUser = users.Register(user, currentUser.Callback);
 
-            callbackContract.OnConnect(DateTime.Now, true, message, _users.Keys.ToArray());
+            if (!currentUser.IsRegistered) {
+                const string error = "Registration failed!";
+                ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
+                currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
+                return;
+            }
 
-            foreach (var pair in _users.Where(pair => !pair.Value.Equals(callbackContract)))
-            {
-                message = String.Format("{0} connected.", user);
-                Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.WriteLine("[{0}] Sending  OnUserConnect({1}, {2}) to {3}", DateTime.Now, user, message, pair.Key);
-                Console.ResetColor();
+            var message = String.Format("Successfully connected as {0}.", user);
+            ConsoleUtils.TraceCallSuccess(currentUser, "OnConnect(true, {0}, string[{1}])", message, users.Count);
+            currentUser.Callback.OnConnect(DateTime.Now, true, message, users.GetRegisteredNames());
 
-                pair.Value.OnUserConnect(DateTime.Now, user, message);
+            foreach (var other in users.GetUsersToNotify(currentUser)) {
+                var notification = String.Format("{0} connected.", user);
+                ConsoleUtils.TraceNotificationSuccess(currentUser, "OnUserConnect({0}, {1}) to {2}", user, notification, other.Name);
+
+                other.Callback.OnUserConnect(DateTime.Now, user, notification);
             }
         }
 
-        public void Disconnect()
-        {
-            Console.WriteLine("[{0}] Recieved Disconnect()", DateTime.Now);
+        public void Disconnect() {
+            ConsoleUtils.TraceCall("Disconnect()");
 
             RefreshUserList();
 
-            var callbackContract = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
-
-            string message;
+            var currentUser = Users.Current;
 
             // Can this user disconnect?
-            if (!_users.ContainsValue(callbackContract))
-            {
+            if (!currentUser.IsRegistered) {
                 // Log it
-                message = String.Format("Could not disconnect. Probably already disconnected.");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnDisconnect(false, {1}) to Unknown", DateTime.Now, message);
-                Console.ResetColor();
+                var error = String.Format("Could not disconnect. Probably already disconnected.");
+                ConsoleUtils.TraceCallFailure(currentUser, "OnDisconnect(false, {0})", error);
 
                 // Notify client
-                callbackContract.OnDisconnect(DateTime.Now, false, message);
+                currentUser.Callback.OnDisconnect(DateTime.Now, false, error);
                 return;
             }
 
             // Remove the user from the active users list
-            string user = null;
-            foreach (var pair in _users.Where(pair => pair.Value.Equals(callbackContract)))
-            {
-                user = pair.Key;
-            }
-            if (user != null) _users.Remove(user);
+            currentUser = users.Unregister(currentUser);
 
             // Log
-            message = String.Format("Successfully disconnected.");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("[{0}] Sending  OnDisconnect(true, {1}) to {2}", DateTime.Now, message, user);
-            Console.ResetColor();
+            var message = String.Format("Successfully disconnected.");
+            ConsoleUtils.TraceCallWarning(currentUser, "OnDisconnect(true, {0})", message);
 
             // Notify client
-            callbackContract.OnDisconnect(DateTime.Now, true, message);
+            currentUser.Callback.OnDisconnect(DateTime.Now, true, message);
 
             // Notify all other clients
-            foreach (var pair in _users.Where(pair => !pair.Value.Equals(callbackContract)))
-            {
+            foreach (var otherUser in users.GetUsersToNotify(currentUser)) {
                 // Log
-                message = String.Format("{0} disconnected.", user);
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine("[{0}] Sending  OnUserDisconnect({1}, {2}) to {3}", DateTime.Now, user, message, pair.Key);
-                Console.ResetColor();
+                var notification = String.Format("{0} disconnected.", currentUser.Name);
+                ConsoleUtils.TraceNotificationWarning(otherUser, "OnUserDisconnect({0}, {1})", currentUser.Name, notification);
 
-                // Notify current client
-                pair.Value.OnUserDisconnect(DateTime.Now, user, message);
+                // Notify the other user
+                otherUser.Callback.OnUserDisconnect(DateTime.Now, currentUser.Name, notification);
             }
         }
 
-        public void Broadcast(string fromUser, string message)
-        {
-            Console.WriteLine("[{0}] Recieved Broadcast({1}, {2})", DateTime.Now, fromUser, message);
+        public void Broadcast(string fromUser, string message) {
+            ConsoleUtils.TraceCall("Broadcast({0}, {1})", fromUser, message);
 
             RefreshUserList();
 
-            var callback = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
+            var currentUser = Users.Current;
 
-            string resultMessage;
-
-            if (!_users.ContainsValue(callback) || !_users.ContainsKey(fromUser))
-            {
+            if (!currentUser.IsRegistered) {
                 // Something is wrong here... Log it
-                resultMessage = "Please connect before broadcasting.";
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnBroadcast(false, {1}, null) to {2}", DateTime.Now, resultMessage, fromUser);
-                Console.ResetColor();
+                const string errorMessage = "Please connect before broadcasting.";
+                ConsoleUtils.TraceCallFailure(currentUser, "OnBroadcast(false, {0}, null)", errorMessage);
 
                 // Notify client
-                callback.OnBroadcast(DateTime.Now, false, resultMessage, null);
+                currentUser.Callback.OnBroadcast(DateTime.Now, false, errorMessage, null);
                 return;
             }
 
@@ -158,76 +130,60 @@ namespace FreddieChatServer
             message = message.Trim();
 
             // Log
-            resultMessage = "Successfully broadcasted the message!";
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("[{0}] Sending  OnBroadcast(true, {1}, {2}) to {3}", DateTime.Now, resultMessage, message, fromUser);
-            Console.ResetColor();
+            const string successMessage = "Successfully broadcasted the message!";
+            ConsoleUtils.TraceCallBroadcast(currentUser, "OnBroadcast(true, {0}, {1})", successMessage, message);
 
             // Notify sending client
-            callback.OnBroadcast(DateTime.Now, true, resultMessage, message);
+            currentUser.Callback.OnBroadcast(DateTime.Now, true, successMessage, message);
 
             // Go through all users' callbacks, but skip the fromUser's callback.
-            foreach (var pair in _users.Where(pair => !pair.Value.Equals(callback)))
-            {
+            foreach (var otherUser in users.GetUsersToNotify(currentUser)) {
                 // Log
-                Console.ForegroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine("[{0}] Sending  OnUserBroadcast({1}, {2}) to {3}", DateTime.Now, fromUser, message, pair.Key);
-                Console.ResetColor();
+                ConsoleUtils.TraceNotificationBroadcast(otherUser, "OnUserBroadcast({0}, {1})", fromUser, message);
 
-                // Notify the current client
-                pair.Value.OnUserBroadcast(DateTime.Now, fromUser, message);
+                // Notify the other user
+                otherUser.Callback.OnUserBroadcast(DateTime.Now, fromUser, message);
             }
         }
 
-        public void Whisper(string fromUser, string toUser, string message)
-        {
-            Console.WriteLine("[{0}] Recieved Whisper({1}, {2}, {3})", DateTime.Now, fromUser, toUser, message);
+        public void Whisper(string fromUser, string toUser, string message) {
+            ConsoleUtils.TraceCall("Whisper({0}, {1}, {2})", fromUser, toUser, message);
 
             RefreshUserList();
 
-            var callback = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
-
-            string resultMessage;
+            var currentUser = Users.Current;
 
             // Is the user allowed to whisper?
-            if (!_users.ContainsValue(callback) || !_users.ContainsKey(fromUser))
-            {
+            if (!currentUser.IsRegistered) {
                 // Something is wrong here... Log
-                resultMessage = "Please connect before whispering.";
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnWhisper(false, {1}, null) to {2}", DateTime.Now, resultMessage, fromUser);
-                Console.ResetColor();
+                const string errorMessage = "Please connect before whispering.";
+                ConsoleUtils.TraceCallFailure(currentUser, "OnWhisper(false, {0}, null)", errorMessage);
 
                 // Notify client
-                callback.OnWhisper(DateTime.Now, false, resultMessage, toUser, null);
+                currentUser.Callback.OnWhisper(DateTime.Now, false, errorMessage, toUser, null);
                 return;
             }
 
             // Is the toUser available?
-            if (!_users.ContainsKey(toUser))
-            {
+            var otherUser = users.GetUser(toUser);
+            if (otherUser == null) {
                 // Something is wrong here... Log
-                resultMessage = String.Format("There is no user named {0}.", toUser);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnWhisper(false, {1}, {2}, null) to {3}", DateTime.Now, resultMessage, toUser, fromUser);
-                Console.ResetColor();
+                var errorMessage = String.Format("There is no user named {0}.", toUser);
+                ConsoleUtils.TraceCallFailure(currentUser, "OnWhisper(false, {0}, {1}, null)", errorMessage, toUser);
 
                 // Notify client
-                callback.OnWhisper(DateTime.Now, false, resultMessage, toUser, null);
+                currentUser.Callback.OnWhisper(DateTime.Now, false, errorMessage, toUser, null);
                 return;
             }
 
             // Is the fromUser whispering to self?
-            if (toUser.Equals(fromUser))
-            {
+            if (toUser.Equals(fromUser)) {
                 // Something is wrong here... Log
-                resultMessage = String.Format("There is no need to whisper to yourself.");
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnWhisper(false, {1}, {2}, null) to {3}", DateTime.Now, resultMessage, toUser, fromUser);
-                Console.ResetColor();
+                var errorMessage = String.Format("There is no need to whisper to yourself.");
+                ConsoleUtils.TraceCallFailure(currentUser, "OnWhisper(false, {0}, {1}, null)", errorMessage, toUser);
 
                 // Notify client
-                callback.OnWhisper(DateTime.Now, false, resultMessage, toUser, null);
+                currentUser.Callback.OnWhisper(DateTime.Now, false, errorMessage, toUser, null);
                 return;
             }
 
@@ -235,109 +191,79 @@ namespace FreddieChatServer
             message = message.Trim();
 
             // Log
-            resultMessage = String.Format("Successfully whispered to {0}.", toUser);
-            Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.WriteLine("[{0}] Sending  OnWhisper(true, {1}, {2}, {3}) to {4}", DateTime.Now, resultMessage, toUser, message, fromUser);
-            Console.ResetColor();
+            var resultMessage = String.Format("Successfully whispered to {0}.", toUser);
+            ConsoleUtils.TraceCallWhisper(currentUser, "OnWhisper(true, {0}, {1}, {2})", resultMessage, toUser, message);
 
             // Notify sending client
-            callback.OnWhisper(DateTime.Now, true, resultMessage, toUser, message);
+            currentUser.Callback.OnWhisper(DateTime.Now, true, resultMessage, toUser, message);
 
             // Log
-            Console.ForegroundColor = ConsoleColor.DarkMagenta;
-            Console.WriteLine("[{0}] Sending  OnUserWhisper({1}, {2}) to {3}", DateTime.Now, fromUser, message, toUser);
-            Console.ResetColor();
+            ConsoleUtils.TraceNotificationWhipser(otherUser, "OnUserWhisper({0}, {1})", fromUser, message);
 
             // Whisper through the toUser callback.
-            _users[toUser].OnUserWhisper(DateTime.Now, fromUser, message);
+            otherUser.Callback.OnUserWhisper(DateTime.Now, fromUser, message);
         }
 
-        public void KeepAlive(string user)
-        {
-            Console.WriteLine("[{0}] Recieved KeepAlive({1})", DateTime.Now, user);
+        public void KeepAlive(string user) {
+            ConsoleUtils.TraceCall("KeepAlive({0})", user);
 
-            var callback = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
-
-            string message;
+            var currentUser = Users.Current;
 
             // Is the user allowed to keep the connection alive?
-            if (!_users.ContainsValue(callback) || !_users.ContainsKey(user))
-            {
+            if (!currentUser.IsRegistered) {
                 // Something is wrong here... Log
-                message = "Please connect before trying to keep connection alive.";
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[{0}] Sending  OnKeepAlive(false, {1}) to {2}", DateTime.Now, message, user);
-                Console.ResetColor();
+                const string error = "Please connect before trying to keep connection alive.";
+                ConsoleUtils.TraceCallFailure(currentUser, "OnKeepAlive(false, {0})", error);
 
                 // Notify client
-                callback.OnKeepAlive(DateTime.Now, false, message);
+                currentUser.Callback.OnKeepAlive(DateTime.Now, false, error);
                 return;
             }
 
             // Log
-            message = "Successfully kept connection alive!";
-            Console.WriteLine("[{0}] Sending  OnKeepAlive(true, {1}) to {2}", DateTime.Now, message, user);
+            const string message = "Successfully kept connection alive!";
+            ConsoleUtils.TraceCallSuccess(currentUser, "OnKeepAlive(true, {0})", message);
 
             // Notify client
-            callback.OnKeepAlive(DateTime.Now, true, message);
+            currentUser.Callback.OnKeepAlive(DateTime.Now, true, message);
         }
 
         #endregion
 
         #region Private helpers
 
-        private void RefreshUserList()
-        {
-            Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("[{0}] System   RefreshUserList()", DateTime.Now);
-            Console.ResetColor();
+        private void RefreshUserList() {
+            ConsoleUtils.TraceSystemWork("Refreshing list of users...");
 
-            // Get all broken connections
-            var usersToRemove = new Dictionary<string, CommunicationState>();
-            foreach (var pair in _users)
-            {
-                var comObj = ((ICommunicationObject)pair.Value);
-                if (comObj.State == CommunicationState.Opened) continue;
-                usersToRemove.Add(pair.Key, comObj.State);
-            }
-
-            foreach (var pair in usersToRemove)
-            {
-                // Remove the user from the active users list
-                var user = pair.Key;
-                _users.Remove(user);
-
+            // Remove all broken connections
+            foreach (var user in users.GetUsersToRemove()) {
                 // Log
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("[{0}] System   Removing user {1}, state was {2}.", DateTime.Now, user, pair.Value);
-                Console.ResetColor();
-            }
+                var state = user.State == null ? "not initialized" : user.State.ToString().ToLower();
+                ConsoleUtils.TraceSystemWarning("Removing user {0} (state was {1}).", user, state);
 
-            foreach (var pair in _users)
-            {
-                foreach (var userToRemovePair in usersToRemove)
-                {
-                    var user = userToRemovePair.Key;
-                    var state = userToRemovePair.Value;
+                // Remove the user from the active users list
+                users.Unregister(user);
+
+                // Notify other users
+                foreach (var otherUser in users.GetUsersToNotify(user)) {
+                    var message = String.Format("{0} disconnected (connection {1}).", user.Name, state);
+
                     // Log
-                    var message = String.Format("{0} disconnected (connection {1}).", user, state.ToString().ToLower());
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine("[{0}] Sending  OnUserDisconnect({1}, {2}) to {3}", DateTime.Now, user, message, pair.Key);
-                    Console.ResetColor();
+                    ConsoleUtils.TraceNotificationWarning(otherUser, "OnUserDisconnect({0}, {1})", user.Name, message);
 
                     // Notify current client
-                    pair.Value.OnUserDisconnect(DateTime.Now, user, message);
+                    otherUser.Callback.OnUserDisconnect(DateTime.Now, user.Name, message);
                 }
             }
-
+            ConsoleUtils.TraceSystemWork("Refresh completed.");
         }
 
-        private void OnRefreshUserListTimerElapsed(object sender, ElapsedEventArgs e)
-        {
+        private void OnRefreshUserListTimerElapsed(object sender, ElapsedEventArgs e) {
             RefreshUserList();
         }
 
         #endregion
+
     }
 
 }

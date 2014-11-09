@@ -1,5 +1,6 @@
 *suo
 *Resharper*
+*.DotSettings.*
 
 # Build Folders
 bin
@@ -7,3 +8,6 @@ obj
 
 # mstest test results
 TestResults
+
+# Service references
+ChatClient/Service References

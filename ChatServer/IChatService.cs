@@ -1,11 +1,9 @@
 ﻿using System.ServiceModel;
 
-namespace FreddieChatServer
-{
+namespace FreddieChatServer {
 
     [ServiceContract(SessionMode = SessionMode.Required, CallbackContract = typeof(IChatCallbackContract))]
-    public interface IChatService
-    {
+    public interface IChatService {
 
         [OperationContract(IsOneWay = true)]
         void Connect(string user);

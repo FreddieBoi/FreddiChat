@@ -15,6 +15,18 @@ The source consists of two projects.
 ### FreddiChatServer ###
 [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It currently doesn't provide any possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
 
+Getting started
+---------------
+1 Open FreddiChat.sln in Visual Studio
+2 Right-click the FreddiChatServer project and select Build to build the server
+3 Browse to FreddiChat\ChatServer\bin\Debug using Windows Explorer and double-click FreddieChatServer.exe to launch the server
+4 Right-click the FreddiChatClient project and select Add Service Reference
+5 Use address net.pipe://localhost/FreddiChat/mex
+6 Use ChatServiceReference as name for the service reference
+7 Press OK to create the service reference.
+8 Right-click the FreddiChatClient project and select Build to build the client
+9 Browse to FreddiChat\ChatClient\bin\Debug using Windows Explorer and double-click FreddieChatClient.exe to launch a client
+
 Author
 ------
 FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github") in C# using WCF (client, server) and WPF (client).
