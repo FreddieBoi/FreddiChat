@@ -38,4 +38,4 @@ Follow the steps below to build the server and the client.
 
 License
 -------
-FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github"). See the [LICENSE.md](https://github.com/FreddieBoi/FreddiChat/blob/master/LICENSE.md) file for license rights and limitations (BEER-WARE).
+FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github"). See the [LICENSE](https://github.com/FreddieBoi/FreddiChat/blob/master/LICENSE) file for license rights and limitations (BEER-WARE).
