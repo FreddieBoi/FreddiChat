@@ -20,7 +20,7 @@ Features
 + **Connect** to (or **Disconnect** from) any server, at any time, using desired name
 + **Broadcast** messages to all users
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
-+ **Reply** to whisper from a specific (type `/r `)
++ **Reply** to whisper from a specific user (type `/r `)
 
 Getting started
 ---------------
