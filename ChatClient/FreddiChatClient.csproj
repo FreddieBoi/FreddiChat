@@ -62,11 +62,6 @@
     </ApplicationDefinition>
     <Compile Include="CustomCommands.cs" />
     <Compile Include="GreyscaleOnDisabledImage.cs" />
-    <Compile Include="Service References\ChatServiceReference\Reference.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Reference.svcmap</DependentUpon>
-    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -104,34 +99,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="Service References\ChatServiceReference\Arrays.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\ChatServiceReference\service.wsdl" />
-    <None Include="Service References\ChatServiceReference\service.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Service References\ChatServiceReference\service1.xsd">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadataStorage Include="Service References\ChatServiceReference\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChatServiceReference\configuration91.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChatServiceReference\configuration.svcinfo" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Service References\ChatServiceReference\Reference.svcmap">
-      <Generator>WCF Proxy Generator</Generator>
-      <LastGenOutput>Reference.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Connect.png" />
