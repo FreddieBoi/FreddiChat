@@ -15,6 +15,13 @@ The source consists of two projects.
 ### FreddiChatServer ###
 [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It currently doesn't provide any possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
 
+Features
+--------
++ **Connect** and **Disconnect** to any server, at any time, using desired name
++ **Broadcast** messages to all users
++ **Whisper** message to specific user (double-click desired name or type `/w username`)
++ **Reply** to whisper from a specific (type `/r `).
+
 Getting started
 ---------------
 Follow the steps below to build the server and the client.
