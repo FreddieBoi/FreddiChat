@@ -37,5 +37,5 @@ Follow the steps below to build the server and the client.
 9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
 
 License
-------_
+-------
 FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github"). See the [LICENSE.md](https://github.com/FreddieBoi/FreddiChat/blob/master/LICENSE.md) file for license rights and limitations (BEER-WARE).
