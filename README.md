@@ -17,10 +17,10 @@ The source consists of two projects.
 
 Features
 --------
-+ **Connect** and **Disconnect** to any server, at any time, using desired name
++ **Connect** to (or **Disconnect** from) any server, at any time, using desired name
 + **Broadcast** messages to all users
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
-+ **Reply** to whisper from a specific (type `/r `).
++ **Reply** to whisper from a specific (type `/r `)
 
 Getting started
 ---------------
