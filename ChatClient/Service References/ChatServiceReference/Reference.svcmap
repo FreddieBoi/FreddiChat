@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="1eb88276-a3bb-4774-a8d0-84fed6dd173b" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="net.pipe://localhost/FreddiChat/mex" Protocol="mex" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="service.wsdl" MetadataType="Wsdl" ID="8bc5ed5e-2102-4c15-823c-2d428a7d8b2e" SourceId="1" SourceUrl="net.pipe://localhost/FreddiChat/mex" />
+    <MetadataFile FileName="service.xsd" MetadataType="Schema" ID="9542eaea-f53a-42fb-aedd-43365adc5764" SourceId="1" SourceUrl="net.pipe://localhost/FreddiChat/mex" />
+    <MetadataFile FileName="service1.xsd" MetadataType="Schema" ID="b895d864-a232-4d45-9cce-cb0dec6a9e09" SourceId="1" SourceUrl="net.pipe://localhost/FreddiChat/mex" />
+    <MetadataFile FileName="Arrays.xsd" MetadataType="Schema" ID="84c8416e-dd06-466b-9d64-f0eb9336cbe6" SourceId="1" SourceUrl="net.pipe://localhost/FreddiChat/mex" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
