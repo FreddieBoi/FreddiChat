@@ -1,6 +1,6 @@
 FreddiChat
 ==========
-FreddiChat is a chat client and server solution written in C# using WCF and WPF. It uses NetNamedPipeBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
+FreddiChat is a chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
 
 Implementation
 --------------
@@ -36,6 +36,6 @@ Follow the steps below to build the server and the client.
 8. Right-click the `FreddiChatClient` project and select `Build` to build the client
 9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
 
-Author
-------
-FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github") in C# using WCF (client, server) and WPF (client).
+License
+------_
+FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github"). See the [LICENSE.md](https://github.com/FreddieBoi/FreddiChat/blob/master/LICENSE.md) file for license rights and limitations (BEER-WARE).
