@@ -2,27 +2,22 @@
 using System.Windows.Controls.Primitives;
 using System.Windows.Interactivity;
 
-namespace FreddiChatClient.Infrastructure
-{
-    public class ContextMenuOnLeftClickBehavior : Behavior<ButtonBase>
-    {
-        protected override void OnAttached()
-        {
+namespace FreddiChatClient.Infrastructure {
+
+    public class ContextMenuOnLeftClickBehavior : Behavior<ButtonBase> {
+        protected override void OnAttached() {
             base.OnAttached();
             AssociatedObject.Click += OnClick;
         }
 
-        protected override void OnDetaching()
-        {
+        protected override void OnDetaching() {
             AssociatedObject.Click -= OnClick;
             base.OnDetaching();
         }
 
-        private void OnClick(object sender, RoutedEventArgs routedEventArgs)
-        {
+        private void OnClick(object sender, RoutedEventArgs routedEventArgs) {
             var contextMenu = AssociatedObject.ContextMenu;
-            if (contextMenu == null)
-            {
+            if (contextMenu == null) {
                 return;
             }
 
@@ -31,4 +26,5 @@ namespace FreddiChatClient.Infrastructure
             contextMenu.IsOpen = true;
         }
     }
+
 }

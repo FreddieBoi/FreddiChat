@@ -214,6 +214,10 @@ namespace FreddiChatClient {
             }
         }
 
+        private void AboutMenuItemClick(object sender, RoutedEventArgs e) {
+           this.ShowMessageAsync("About FreddiChat", "FreddiChat is a simple chat client written in C# using WPF (client) and WCF (client, server). FreddiChat is written by FreddieBoi. See the LICENSE file for license rights and limitations (BEER-WARE).");
+        }
+
         private void MessageTextBoxTextChanged(object sender, TextChangedEventArgs e) {
             var text = messageTextBox.Text.ToLower();
             // Do we have a user to quick respond to? And should we?
@@ -433,7 +437,9 @@ namespace FreddiChatClient {
             _messageHistoryIndex += direction;
 
             // Wrap around to index 0, the String.Empty entry.
-            if (Math.Abs(_messageHistoryIndex) > _messageHistory.Count - 1) _messageHistoryIndex = 0;
+            if (Math.Abs(_messageHistoryIndex) > _messageHistory.Count - 1) {
+                _messageHistoryIndex = 0;
+            }
 
             // Set the message to the history message (the message at |index|)
             // Using absolute will make both Up and Down keys work.

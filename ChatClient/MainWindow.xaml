@@ -4,8 +4,9 @@
         xmlns:FreddiChatClient="clr-namespace:FreddiChatClient"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:Infrastructure="clr-namespace:FreddiChatClient.Infrastructure"
-        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        Title="FreddiChat" Height="475" 
+        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        Title="FreddiChat"
+        Height="475" 
         Width="750"
         ResizeMode="NoResize"
         BorderBrush="{DynamicResource AccentColorBrush}"
@@ -15,7 +16,7 @@
         Closing="WindowClosing">
     <Controls:MetroWindow.RightWindowCommands>
         <Controls:WindowCommands>
-            <Button Content="Tools" ToolTip="Tools">
+            <Button Content="_Tools" ToolTip="Tools">
                 <i:Interaction.Behaviors>
                     <Infrastructure:ContextMenuOnLeftClickBehavior/>
                 </i:Interaction.Behaviors>
@@ -25,7 +26,7 @@
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
-            <Button Content="Help" ToolTip="Help">
+            <Button Content="_Help" ToolTip="Help">
                 <i:Interaction.Behaviors>
                     <Infrastructure:ContextMenuOnLeftClickBehavior/>
                 </i:Interaction.Behaviors>
@@ -36,73 +37,63 @@
                         <MenuItem Header="Report a Bug"/>
                         <MenuItem Header="Technical Support"/>
                         <Separator />
-                        <MenuItem Header="About FreddiChat"/>
+                        <MenuItem Header="About FreddiChat" Click="AboutMenuItemClick" />
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>
     <Grid>
-        <RichTextBox Height="312" HorizontalAlignment="Left" Margin="11,41,0,0" Name="chatTextBox" VerticalAlignment="Top" Width="586" IsReadOnly="True" IsEnabled="False" AcceptsReturn="False" VerticalScrollBarVisibility="Auto">
+        <RichTextBox Margin="11,44,0,0" x:Name="chatTextBox" IsReadOnly="True" IsEnabled="False" AcceptsReturn="False" VerticalScrollBarVisibility="Auto" Height="310" VerticalAlignment="Top" HorizontalAlignment="Left" Width="586">
             <RichTextBox.Resources>
                 <Style TargetType="{x:Type Paragraph}">
                     <Setter Property="Margin" Value="0"/>
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <Button Height="23" HorizontalAlignment="Left" Margin="11,358,0,0" Name="boldButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
-            <Rectangle Width="13"
-                Height="13"
-                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+        <Button Height="23" HorizontalAlignment="Left" Margin="11,357,0,0" x:Name="boldButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
+            <Rectangle Width="13" Height="13" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_text_bold}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button Height="23" HorizontalAlignment="Left" Margin="39,358,0,0" x:Name="italicButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
-            <Rectangle Width="13"
-                Height="13"
-                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+        <Button Height="23" HorizontalAlignment="Left" Margin="39,357,0,0" x:Name="italicButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
+            <Rectangle Width="13" Height="13" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_text_italic}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button Height="23" HorizontalAlignment="Left" Margin="67,358,0,0" x:Name="underlineButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
-            <Rectangle Width="13"
-                Height="13"
-                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+        <Button Height="23" HorizontalAlignment="Left" Margin="67,357,0,0" x:Name="underlineButton" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
+            <Rectangle Width="13" Height="13" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_text_underline}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <Button Height="23" HorizontalAlignment="Left" Margin="95,358,0,0" x:Name="connectBold_Copy2" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
-            <Rectangle Width="13"
-                Height="13"
-                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+        <Button Height="23" HorizontalAlignment="Left" Margin="95,357,0,0" x:Name="connectBold_Copy2" VerticalAlignment="Top" Width="23" ToolTip="Coming Soon..." IsEnabled="False">
+            <Rectangle Width="13" Height="13" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_draw_brush_reflection}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <ComboBox HorizontalAlignment="Left" Margin="123,358,0,0" VerticalAlignment="Top" Width="145" Height="24" IsEnabled="False" ToolTip="Coming Soon..."/>
-        <ComboBox HorizontalAlignment="Left" Margin="273,358,0,0" VerticalAlignment="Top" Width="60" IsEnabled="False" ToolTip="Coming Soon..."/>
-        <Button Height="23" HorizontalAlignment="Left" Margin="338,359,0,0" x:Name="emoticonButton" VerticalAlignment="Top" IsEnabled="False" Width="23" ToolTip="Coming Soon..." >
-            <Rectangle Width="13"
-                Height="13"
-                Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
+        <ComboBox HorizontalAlignment="Left" Margin="123,357,0,0" VerticalAlignment="Top" Width="145" Height="24" IsEnabled="False" ToolTip="Coming Soon..."/>
+        <ComboBox HorizontalAlignment="Left" Margin="273,357,0,0" VerticalAlignment="Top" Width="60" IsEnabled="False" ToolTip="Coming Soon..."/>
+        <Button Height="23" HorizontalAlignment="Left" Margin="338,358,0,0" x:Name="emoticonButton" VerticalAlignment="Top" IsEnabled="False" Width="23" ToolTip="Coming Soon..." >
+            <Rectangle Width="13" Height="13" Fill="{Binding Path=Foreground, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Button}}}">
                 <Rectangle.OpacityMask>
                     <VisualBrush Stretch="Fill" Visual="{DynamicResource appbar_smiley_grin}" />
                 </Rectangle.OpacityMask>
             </Rectangle>
         </Button>
-        <TextBox Controls:TextboxHelper.Watermark="Username" Name="userNameTextBox" Height="23" HorizontalAlignment="Left" Margin="11,10,0,0" VerticalAlignment="Top" Width="130" TabIndex="0" />
-        <TextBox Controls:TextboxHelper.Watermark="Server hostname or IP" Height="23" HorizontalAlignment="Left" Margin="146,10,0,0" Name="hostNameTextBox" VerticalAlignment="Top" Width="164" TabIndex="1" />
-        <Button Height="23" HorizontalAlignment="Left" Margin="315,11,0,0" Name="connectButton" VerticalAlignment="Top" Width="23" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect" />
-        <Button Content="Disconnect" Margin="484,12,162,0" x:Name="disconnectButton" IsEnabled="False" Background="LightGray" Style="{DynamicResource MetroFlatButton}" Width="96" Height="29" VerticalAlignment="Top" Click="DisconnectButtonClick" ToolTip="Disconnect" />
-        <ListBox Margin="604,41,10,0" Name="userListBox" ItemsSource="{Binding}" Focusable="False" BorderBrush="Gray" BorderThickness="0.5" MouseDoubleClick="UserListBoxMouseDoubleClick" Height="394" VerticalAlignment="Top" />
-        <TextBox Margin="10,388,0,0" Name="messageTextBox" IsEnabled="False" MaxLength="256" TabIndex="3" PreviewKeyDown="MessageTextBoxPreviewKeyDown" TextChanged="MessageTextBoxTextChanged" Height="48" VerticalAlignment="Top" HorizontalAlignment="Left" Width="509" />
-        <Button Content="Send" Margin="510,388,0,0" x:Name="sendButton" IsEnabled="False" Click="SendButtonClick" Height="48" VerticalAlignment="Top" HorizontalAlignment="Left" Width="87" />
+        <TextBox Controls:TextboxHelper.Watermark="Username" x:Name="userNameTextBox" Height="29" Margin="10,10,0,0" VerticalAlignment="Top" TabIndex="0" HorizontalAlignment="Left" Width="258" FontSize="14" />
+        <TextBox Controls:TextboxHelper.Watermark="Server hostname or IP" x:Name="hostNameTextBox" Height="29" Margin="273,10,0,0" VerticalAlignment="Top" TabIndex="1" FontSize="14" HorizontalAlignment="Left" Width="324" />
+        <Button Content="Connect" x:Name="connectButton" Background="LightGray" Style="{DynamicResource MetroFlatButton}" Height="29" VerticalAlignment="Top" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect" Margin="0,10,10,0" HorizontalAlignment="Right" Width="135" />
+        <Button Content="Disconnect" x:Name="disconnectButton" Visibility="Hidden" IsEnabled="False" Background="LightGray" Style="{DynamicResource MetroFlatButton}" Width="130" Height="29" VerticalAlignment="Top" Click="DisconnectButtonClick" ToolTip="Disconnect" Margin="0,10,10,0" HorizontalAlignment="Right" />
+        <ListBox Margin="0,44,10,10" x:Name="userListBox" ItemsSource="{Binding}" Focusable="False" BorderBrush="Gray" BorderThickness="0.5" MouseDoubleClick="UserListBoxMouseDoubleClick" HorizontalAlignment="Right" Width="135" />
+        <TextBox Margin="10,0,0,10" x:Name="messageTextBox" IsEnabled="False" MaxLength="256" TabIndex="3" PreviewKeyDown="MessageTextBoxPreviewKeyDown" TextChanged="MessageTextBoxTextChanged" HorizontalAlignment="Left" Width="495" Height="48" VerticalAlignment="Bottom" />
+        <Button Content="Send" Margin="510,0,0,10" x:Name="sendButton" IsEnabled="False" Click="SendButtonClick" Height="48" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="87" />
     </Grid>
 </Controls:MetroWindow>
