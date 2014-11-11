@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("FreddiChatServer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("FreddiWare")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FreddiChatServer")]
-[assembly: AssemblyCopyright("Copyright © FreddiWare 2011")]
+[assembly: AssemblyCopyright("Copyright © Fredrik Pettersson 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

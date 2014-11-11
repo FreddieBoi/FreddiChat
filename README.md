@@ -34,6 +34,7 @@ Follow the steps below to build the server and the client.
     + Use `ChatServiceReference` as name for the service reference
     + Press `OK` to create the service reference
 8. Right-click the `FreddiChatClient` project and select `Build` to build the client
+    + NuGet package restore should automatically be performed
 9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
 
 License

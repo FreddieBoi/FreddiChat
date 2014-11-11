@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.ServiceModel;
-using System.Threading;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using FreddiChatClient.ChatServiceReference;
+using MahApps.Metro.Controls;
+using MahApps.Metro.Controls.Dialogs;
+using System.ServiceModel;
+using System.Runtime.InteropServices;
+using System.Windows.Threading;
+using System.Threading;
+using System.Diagnostics;
 
 namespace FreddiChatClient {
 
@@ -18,7 +26,7 @@ namespace FreddiChatClient {
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     [CallbackBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
-    public partial class MainWindow : IChatServiceCallback {
+    public partial class MainWindow : MetroWindow, IChatServiceCallback {
 
         private ChatServiceClient _chatClient;
 
@@ -206,14 +214,8 @@ namespace FreddiChatClient {
             }
         }
 
-        private void ExitMenuItemClick(object sender, RoutedEventArgs e) {
-            Close();
-        }
-
         private void AboutMenuItemClick(object sender, RoutedEventArgs e) {
-            MessageBox.Show("FreddiChat is a chat client by Fredrik Pettersson.",
-                "About FreddiChat", MessageBoxButton.OK,
-                MessageBoxImage.Information);
+           this.ShowMessageAsync("About FreddiChat", "FreddiChat is a simple chat client written in C# using WPF (client) and WCF (client, server). FreddiChat is written by FreddieBoi. See the LICENSE file for license rights and limitations (BEER-WARE).");
         }
 
         private void MessageTextBoxTextChanged(object sender, TextChangedEventArgs e) {
@@ -264,9 +266,9 @@ namespace FreddiChatClient {
             }
             connectButton.IsDefault = enabled;
             connectButton.IsEnabled = enabled;
-            connectMenuItem.IsEnabled = enabled;
             userNameTextBox.IsEnabled = enabled;
             hostNameTextBox.IsEnabled = enabled;
+            disconnectButton.Visibility = Visibility.Hidden;
         }
 
         private void EnableDisconnect(bool enabled) {
@@ -274,7 +276,7 @@ namespace FreddiChatClient {
                 _keepAliveTimer.Start();
             }
             disconnectButton.IsEnabled = enabled;
-            disconnectMenuItem.IsEnabled = enabled;
+            disconnectButton.Visibility = Visibility.Visible;
         }
 
         private void Connect(string username, string hostname) {
@@ -435,7 +437,9 @@ namespace FreddiChatClient {
             _messageHistoryIndex += direction;
 
             // Wrap around to index 0, the String.Empty entry.
-            if (Math.Abs(_messageHistoryIndex) > _messageHistory.Count - 1) _messageHistoryIndex = 0;
+            if (Math.Abs(_messageHistoryIndex) > _messageHistory.Count - 1) {
+                _messageHistoryIndex = 0;
+            }
 
             // Set the message to the history message (the message at |index|)
             // Using absolute will make both Up and Down keys work.

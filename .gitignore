@@ -11,3 +11,6 @@ TestResults
 
 # Service references
 ChatClient/Service References
+
+# NuGet packages
+packages
