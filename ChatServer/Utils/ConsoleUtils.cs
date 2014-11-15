@@ -1,15 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using FreddieChatServer.Managers;
 
-namespace FreddieChatServer {
+namespace FreddieChatServer.Utils {
 
     public static class ConsoleUtils {
-
-        public enum Category {
-            Success,
-            Warning,
-            Error,
-            Broadcast
-        }
 
         /// <summary>
         /// Trace recieved service call.
@@ -159,6 +154,34 @@ namespace FreddieChatServer {
             Console.ForegroundColor = color;
             Console.WriteLine("[{0}] System   {1}", DateTime.Now, string.Format(format, arg));
             Console.ResetColor();
+        }
+
+        public static string ReadAny(string info) {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("{0}:", info);
+
+            var command = string.Empty;
+            while (string.IsNullOrWhiteSpace(command)) {
+                command = Console.ReadLine();
+            }
+
+            Console.ResetColor();
+            return command.ToLower();
+        }
+
+        public static string ReadCommand(string info, params string[] commands) {
+            var commandList = new List<string>(commands);
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("{0} ({1}):", info, string.Join(", ", commandList));
+
+            var command = string.Empty;
+            while (!commandList.Contains(command)) {
+                command = Console.ReadLine().ToLower();
+            }
+
+            Console.ResetColor();
+            return command;
         }
 
     }

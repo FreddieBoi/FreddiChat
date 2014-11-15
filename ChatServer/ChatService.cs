@@ -1,6 +1,9 @@
 ﻿using System;
 using System.ServiceModel;
 using System.Timers;
+using FreddieChatServer.Contracts;
+using FreddieChatServer.Managers;
+using FreddieChatServer.Utils;
 
 namespace FreddieChatServer {
 
@@ -11,6 +14,9 @@ namespace FreddieChatServer {
 
         private readonly Timer refreshUserListTimer = new Timer();
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public ChatService() {
             refreshUserListTimer.Elapsed += OnRefreshUserListTimerElapsed;
             // Set the Interval to every 10 seconds.

@@ -26,9 +26,10 @@ Getting started
 ---------------
 Follow the steps below to build the server and the client.
 
-1. Open `FreddiChat.sln` in `Visual Studio`
+1. Open `FreddiChat.sln` in `Visual Studio`.
 2. Right-click the `FreddiChatServer` project and select `Build` to build the server
 3. Browse to `FreddiChat\ChatServer\bin\Debug` and execute `FreddieChatServer.exe` to start the server
+    + Select 'net.pipe' as protocol when prompted
 4. Right-click the `FreddiChatClient` project and select `Add Service Reference`
     + Use `net.pipe://localhost/FreddiChat/mex` as address for the service reference
     + Use `ChatServiceReference` as name for the service reference
