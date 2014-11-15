@@ -1,6 +1,6 @@
 FreddiChat
 ==========
-FreddiChat is a chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
+FreddiChat is a simple chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding or WSDualHttpBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
 
 Implementation
 --------------
@@ -13,7 +13,7 @@ The source consists of two projects.
 [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
 
 ### FreddiChatServer ###
-[FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It currently doesn't provide any possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
+[FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It only provides very limited possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
 
 Features
 --------
@@ -22,14 +22,19 @@ Features
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
 + **Reply** to last received whisper (type `/r `)
 
+Modes
+-----
++ **Named Pipe** using the `NetNamedPipeBinding`, e.g. `net.pipe://localhost/FreddiChat/`
++ **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
+
 Getting started
 ---------------
 Follow the steps below to build the server and the client.
 
-1. Open `FreddiChat.sln` in `Visual Studio`.
+1. Open `FreddiChat.sln` in `Visual Studio`
 2. Right-click the `FreddiChatServer` project and select `Build` to build the server
 3. Browse to `FreddiChat\ChatServer\bin\Debug` and execute `FreddieChatServer.exe` to start the server
-    + Select 'net.pipe' as protocol when prompted
+    + Select `net.pipe` as protocol when prompted
 4. Right-click the `FreddiChatClient` project and select `Add Service Reference`
     + Use `net.pipe://localhost/FreddiChat/mex` as address for the service reference
     + Use `ChatServiceReference` as name for the service reference
