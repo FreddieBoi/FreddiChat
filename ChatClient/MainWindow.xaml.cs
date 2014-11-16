@@ -59,10 +59,16 @@ namespace FreddiChatClient {
         }
 
         public void OnDisconnect(DateTime dateTime, bool result, string message) {
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red)));
-            if (!result) return;
-            _dispatcher.Invoke(new Action(() => RemoveUser(userNameTextBox.Text)));
-            _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+            try {
+                _chatClient.Close();
+            } catch (Exception) {
+                // Ignore any error
+                _chatClient.Abort();
+            } finally {
+                _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red)));
+                _dispatcher.Invoke(new Action(() => RemoveUser(userNameTextBox.Text)));
+                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+            }
         }
 
         public void OnUserConnect(DateTime dateTime, string user, string message) {
@@ -114,7 +120,9 @@ namespace FreddiChatClient {
             _keepAliveTimer.Start();
 
             // No need to show the successful keep alive to the user.
-            if (result) return;
+            if (result) {
+                return;
+            }
 
             // Disable chat.
             _dispatcher.Invoke(new Action(() => EnableChat(false)));
@@ -190,12 +198,16 @@ namespace FreddiChatClient {
                 return;
             }
             var name = userNameTextBox.Text;
-            ThreadPool.QueueUserWorkItem(delegate { Send(name, message); });
+            ThreadPool.QueueUserWorkItem(delegate {
+                Send(name, message);
+            });
         }
 
         private void UserListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e) {
             var listBoxItem = GetElementFromPoint(userListBox, e.GetPosition(userListBox)) as ListBoxItem;
-            if (listBoxItem == null) return;
+            if (listBoxItem == null) {
+                return;
+            }
 
             if (listBoxItem.Content.Equals(userNameTextBox.Text)) {
                 AppendText("There is no need to whisper to yourself.", Colors.Red);
@@ -245,7 +257,9 @@ namespace FreddiChatClient {
 
         private void RemoveUser(string user) {
             var itemToRemove = userListBox.Items.Cast<ListBoxItem>().FirstOrDefault(item => item.Content.Equals(user));
-            if (itemToRemove == null) return;
+            if (itemToRemove == null) {
+                return;
+            }
             userListBox.Items.Remove(itemToRemove);
         }
 
@@ -260,7 +274,9 @@ namespace FreddiChatClient {
         }
 
         private void AddUser(string user) {
-            userListBox.Items.Add(new ListBoxItem { Content = user });
+            userListBox.Items.Add(new ListBoxItem {
+                Content = user
+            });
         }
 
         private void AddUsers(IEnumerable<string> users) {
@@ -329,9 +345,10 @@ namespace FreddiChatClient {
         private void Disconnect() {
             try {
                 _chatClient.Disconnect();
-                _chatClient.Close();
-            } catch (Exception e) {
-                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
+            } catch (Exception) {
+                // Ignore any error
+                _chatClient.Abort();
+            } finally {
                 _dispatcher.Invoke(new Action(() => EnableChat(false)));
                 _dispatcher.Invoke(new Action(() => EnableConnect(true)));
                 _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
@@ -412,17 +429,23 @@ namespace FreddiChatClient {
 
         private void AppendText(DateTime dateTime, string sender, string senderInfo, string text, Color color) {
             // Create a textrange at the very end of the chat text box, extend the range with the new text.
-            var textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.Format("[{0}] ", dateTime) };
+            var textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = String.Format("[{0}] ", dateTime)
+            };
             // Colorize the last added section.
             textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.Format("{0}", sender) };
+            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = String.Format("{0}", sender)
+            };
             // Colorize the last added section.
             textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
             // Make it bold.
             textRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.IsNullOrEmpty(senderInfo) ? String.Format(": {0}", text) : String.Format(" {0}: {1}", senderInfo, text) };
+            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = String.IsNullOrEmpty(senderInfo) ? String.Format(": {0}", text) : String.Format(" {0}: {1}", senderInfo, text)
+            };
             // Colorize the last added section.
             textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
             // Make it normal
