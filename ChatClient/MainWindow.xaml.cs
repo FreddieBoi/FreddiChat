@@ -377,6 +377,12 @@ namespace FreddiChatClient {
 
         private void Send(string name, string message) {
             try {
+                // Is this a disconnect command?
+                if (message.ToLower().StartsWith("/d") || message.ToLower().StartsWith("/disconnect")) {
+                    Disconnect();
+                    return;
+                }
+
                 // Is this a whisper message?
                 if (message.ToLower().StartsWith("/w ") || message.ToLower().StartsWith("/whisper ")) {
                     try {
