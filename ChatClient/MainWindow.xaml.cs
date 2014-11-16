@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
+using System.ServiceModel.Channels;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -144,25 +145,37 @@ namespace FreddiChatClient {
 
         private void ConnectButtonClick(object sender, RoutedEventArgs e) {
             var username = userNameTextBox.Text;
-            var hostname = hostNameTextBox.Text;
-            if (String.IsNullOrWhiteSpace(username) || username.Contains(" ")) {
+            if (string.IsNullOrWhiteSpace(username) || username.Contains(" ")) {
                 AppendText("Please enter a valid username and try to connect again.", Colors.Red);
                 EnableConnect(true);
                 return;
             }
-            if (String.IsNullOrWhiteSpace(hostname) || hostname.Contains(" ")) {
+
+            var hostname = hostNameTextBox.Text;
+            if (string.IsNullOrWhiteSpace(hostname) || hostname.Contains(" ")) {
                 AppendText("Please enter a valid hostname or IP.", Colors.Red);
                 EnableConnect(true);
                 return;
             }
+
+            var selectedItem = protocolComboBox.SelectedItem as ComboBoxItem;
+
+            var protocol = selectedItem == null ? string.Empty : selectedItem.Content.ToString();
+
+            var port = portTextBox.Text;
+
             EnableConnect(false);
-            ThreadPool.QueueUserWorkItem(delegate { Connect(username, hostname); });
+            ThreadPool.QueueUserWorkItem(delegate {
+                Connect(username, protocol, hostname, port);
+            });
         }
 
         private void DisconnectButtonClick(object sender, RoutedEventArgs e) {
             EnableDisconnect(false);
             EnableChat(false);
-            ThreadPool.QueueUserWorkItem(delegate { Disconnect(); });
+            ThreadPool.QueueUserWorkItem(delegate {
+                Disconnect();
+            });
         }
 
         private void SendButtonClick(object sender, RoutedEventArgs e) {
@@ -266,7 +279,9 @@ namespace FreddiChatClient {
             connectButton.IsEnabled = enabled;
             connectMenuItem.IsEnabled = enabled;
             userNameTextBox.IsEnabled = enabled;
+            protocolComboBox.IsEnabled = enabled;
             hostNameTextBox.IsEnabled = enabled;
+            portTextBox.IsEnabled = enabled;
         }
 
         private void EnableDisconnect(bool enabled) {
@@ -277,11 +292,30 @@ namespace FreddiChatClient {
             disconnectMenuItem.IsEnabled = enabled;
         }
 
-        private void Connect(string username, string hostname) {
+        private void Connect(string username, string protocol, string hostname, string port) {
             try {
-                const string endpointConfigurationName = "NetNamedPipeBinding_IChatService";
-                var remoteAdress = String.Format("net.pipe://{0}/FreddiChat", hostname);
-                _chatClient = new ChatServiceClient(new InstanceContext(this), endpointConfigurationName, remoteAdress);
+                Binding binding;
+                switch (protocol) {
+                    case "Named Pipe":
+                        protocol = "net.pipe";
+                        port = string.Empty;
+                        binding = new NetNamedPipeBinding();
+                        break;
+                    case "HTTP":
+                    default:
+                        protocol = "http";
+                        port = string.IsNullOrEmpty(port) ? string.Empty : string.Format(":{0}", port);
+                        var httpBinding = new WSDualHttpBinding();
+                        httpBinding.Security.Mode = WSDualHttpSecurityMode.None;
+                        binding = httpBinding;
+                        break;
+                }
+
+                // Create the endpoint address. 
+                var serverUrl = string.Format("{0}://{1}{2}/FreddiChat", protocol, hostname, port);
+                EndpointAddress endpointAddress = new EndpointAddress(serverUrl);
+                _chatClient = new ChatServiceClient(new InstanceContext(this), binding, endpointAddress);
+
                 _chatClient.Open();
                 _chatClient.Connect(username);
             } catch (Exception e) {

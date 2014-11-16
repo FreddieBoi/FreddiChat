@@ -159,6 +159,19 @@ namespace FreddieChatServer.Utils {
         public static string ReadAny(string info) {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("{0}:", info);
+            Console.Write("> ");
+
+            var command = string.Empty;
+            command = Console.ReadLine();
+
+            Console.ResetColor();
+            return command.ToLower();
+        }
+
+        public static string ReadNonEmpty(string info) {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("{0}:", info);
+            Console.Write("> ");
 
             var command = string.Empty;
             while (string.IsNullOrWhiteSpace(command)) {
@@ -174,6 +187,7 @@ namespace FreddieChatServer.Utils {
 
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("{0} ({1}):", info, string.Join(", ", commandList));
+            Console.Write("> ");
 
             var command = string.Empty;
             while (!commandList.Contains(command)) {

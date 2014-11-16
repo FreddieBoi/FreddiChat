@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ServiceModel;
 using System.ServiceModel.Description;
+using System.ServiceModel.Security;
 using FreddieChatServer.Contracts;
+using FreddieChatServer.Managers;
 using FreddieChatServer.Modes;
 using FreddieChatServer.Utils;
 
@@ -28,11 +30,14 @@ namespace FreddieChatServer {
                     break;
             }
 
-            string url = string.Format("{0}://localhost", mode.Protocol);
+            // Select server hostname (the name clients will use)
+            var hostname = ConsoleUtils.ReadNonEmpty("Select server hostname");
+
+            string url = string.Format("{0}://{1}", mode.Protocol, hostname);
 
             // Select server port (if required)
             if (mode.IsPortRequired) {
-                var port = ConsoleUtils.ReadAny("Select server port");
+                var port = ConsoleUtils.ReadNonEmpty("Select server port");
                 url = string.Format("{0}:{1}", url, port);
             }
 
@@ -62,13 +67,14 @@ namespace FreddieChatServer {
                     command = Console.ReadLine();
                 }
 
+                service.Close();
             } catch (CommunicationException communicationException) {
                 ConsoleUtils.TraceSystemError("Unexpected communication error: {0}", communicationException.Message);
             } catch (Exception exception) {
                 ConsoleUtils.TraceSystemError("Unexpected error: {0}", exception.Message);
             } finally {
                 // Close the ServiceHostBase to shutdown the service.
-                service.Close();
+                service.Abort();
             }
         }
 

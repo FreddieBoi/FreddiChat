@@ -39,16 +39,21 @@
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,27,0,0" Name="userNameTextBox" VerticalAlignment="Top" Width="128" Text="Anonymous" ToolTip="Username" TabIndex="0" />
-        <Button Height="23" HorizontalAlignment="Left" Margin="316,27,0,0" Name="connectButton" VerticalAlignment="Top" Width="23" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect">
-            <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Connect.png" HorizontalAlignment="Stretch" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="13,28,0,0" Name="userNameTextBox" VerticalAlignment="Top" Width="128" Text="Anonymous" ToolTip="Username" TabIndex="0" />
+        <Button Height="23" HorizontalAlignment="Left" Margin="727,28,0,0" Name="connectButton" VerticalAlignment="Top" Width="23" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect" TabIndex="4">
+            <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Connect.png" />
         </Button>
-        <Button Height="23" HorizontalAlignment="Left" Margin="345,27,0,0" Name="disconnectButton" VerticalAlignment="Top" Width="23" Click="DisconnectButtonClick" IsEnabled="False" ToolTip="Disconnect">
+        <Button Height="23" HorizontalAlignment="Left" Margin="755,28,0,0" Name="disconnectButton" VerticalAlignment="Top" Width="23" Click="DisconnectButtonClick" IsEnabled="False" ToolTip="Disconnect" TabIndex="5">
             <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Disconnect.png" />
         </Button>
         <ListBox Height="464" HorizontalAlignment="Left" Margin="12,56,0,0" Name="userListBox" VerticalAlignment="Top" Width="128" ItemsSource="{Binding}" Focusable="False" MouseDoubleClick="UserListBoxMouseDoubleClick" />
         <TextBox Height="64" HorizontalAlignment="Left" Margin="146,456,0,0" Name="messageTextBox" VerticalAlignment="Top" Width="632" IsEnabled="False" PreviewKeyDown="MessageTextBoxPreviewKeyDown" TextChanged="MessageTextBoxTextChanged" MaxLength="256" TabIndex="3" />
         <Button Content="Send" Height="23" HorizontalAlignment="Left" Margin="703,526,0,0" Name="sendButton" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="SendButtonClick" />
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="146,27,0,0" Name="hostNameTextBox" VerticalAlignment="Top" Width="164" Text="localhost" ToolTip="Server hostname or IP" TabIndex="1" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="243,28,0,0" Name="hostNameTextBox" VerticalAlignment="Top" Width="411" Text="localhost" ToolTip="Server hostname or IP" TabIndex="2" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="659,28,0,0" Name="portTextBox" VerticalAlignment="Top" Width="64" Text="8080" ToolTip="Server port" TabIndex="3" />
+        <ComboBox Height="23" HorizontalAlignment="Left" Margin="146,28,0,0" Name="protocolComboBox" VerticalAlignment="Top" Width="92" ToolTip="Server protocol" TabIndex="1">
+            <ComboBoxItem IsSelected="True">HTTP</ComboBoxItem>
+            <ComboBoxItem >Named Pipe</ComboBoxItem>
+        </ComboBox>
     </Grid>
 </Window>

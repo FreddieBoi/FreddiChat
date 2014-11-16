@@ -45,7 +45,10 @@ namespace FreddieChatServer.Modes {
         /// Constructor.
         /// </summary>
         public HttpChatServiceMode() {
-            ServiceEndpointBinding = new WSDualHttpBinding();
+            var binding = new WSDualHttpBinding();
+            binding.Security.Mode = WSDualHttpSecurityMode.None;
+            ServiceEndpointBinding = binding;
+
             ServiceMetadataBinding = MetadataExchangeBindings.CreateMexHttpBinding();
             ServiceBehavior = new ServiceMetadataBehavior {
                 MetadataExporter = {
