@@ -74,9 +74,11 @@ namespace FreddiChatClient {
                 // Ignore any error
                 chatClient.Abort();
             } finally {
-                dispatcher.Invoke(new Action(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red)));
-                dispatcher.Invoke(new Action(() => RemoveUser(userNameTextBox.Text)));
-                dispatcher.Invoke(new Action(() => EnableConnect(true)));
+                if (!dispatcher.HasShutdownStarted) {
+                    dispatcher.Invoke(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red));
+                    dispatcher.Invoke(() => RemoveUser(userNameTextBox.Text));
+                    dispatcher.Invoke(() => EnableConnect(true));
+                }
             }
         }
 
@@ -157,10 +159,13 @@ namespace FreddiChatClient {
 
         private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
             if (disconnectButton.IsEnabled) {
+                Disconnect();
                 EnableDisconnect(false);
                 EnableChat(false);
-                Disconnect();
             }
+
+            // Abort pending work in the queue
+            dispatcher.InvokeShutdown();
         }
 
         private void ConnectButtonClick(object sender, RoutedEventArgs e) {
@@ -396,9 +401,9 @@ namespace FreddiChatClient {
                     return;
                 }
 
-                // Is this a disconnect command?
-                if (message.ToLower().StartsWith("/quit") || message.ToLower().StartsWith("/exit")) {
-                    dispatcher.Invoke(Application.Current.Shutdown);
+                // Is this a quit command?
+                if (message.ToLower().StartsWith("/q") || message.ToLower().StartsWith("/quit") || message.ToLower().StartsWith("/exit")) {
+                    Close();
                     return;
                 }
 
