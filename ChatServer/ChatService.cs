@@ -49,7 +49,7 @@ namespace FreddieChatServer {
 
             if (currentUser.State == null || currentUser.State != CommunicationState.Opened) {
                 var state = currentUser.State == null ? "not initialized" : currentUser.State.ToString().ToLower();
-                var error = String.Format("Could not connect. Connection not properly opened (state was {0}).", state);
+                var error = String.Format("Could not connect. Connection not properly opened (connection {0}).", state);
                 ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
                 currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
                 return;
@@ -226,6 +226,9 @@ namespace FreddieChatServer {
                 return;
             }
 
+            // Keep alive...
+            currentUser.AliveAt = DateTime.Now;
+
             // Log
             const string message = "Successfully kept connection alive!";
             ConsoleUtils.TraceCallSuccess(currentUser, "OnKeepAlive(true, {0})", message);
@@ -244,23 +247,32 @@ namespace FreddieChatServer {
             // Remove all broken connections
             foreach (var user in users.GetUsersToRemove()) {
                 // Log
+                var reason = !user.State.HasValue || user.State.Value != CommunicationState.Opened ? "connection state" : "timeout";
                 var state = user.State == null ? "not initialized" : user.State.ToString().ToLower();
-                ConsoleUtils.TraceSystemWarning("Removing user {0} (state was {1}).", user, state);
+                ConsoleUtils.TraceSystemWarning("Removing user {0} due to {1} (connection {2}).", user, reason, state);
 
                 // Remove the user from the active users list
                 users.Unregister(user);
 
+                try {
+                    // Try to notify client...
+                    user.Callback.OnDisconnect(DateTime.Now, true, string.Format("Disconnected due to {0} (connection {1}).", reason, state));
+                } catch {
+                    // Ignore any error
+                }
+
                 // Notify other users
                 foreach (var otherUser in users.GetUsersToNotify(user)) {
-                    var message = String.Format("{0} disconnected (connection {1}).", user.Name, state);
+                    var message = String.Format("{0} disconnected due to {1} (connection {2}).", user.Name, reason, state);
 
                     // Log
                     ConsoleUtils.TraceNotificationWarning(otherUser, "OnUserDisconnect({0}, {1})", user.Name, message);
 
-                    // Notify current client
+                    // Notify client
                     otherUser.Callback.OnUserDisconnect(DateTime.Now, user.Name, message);
                 }
             }
+
             ConsoleUtils.TraceSystemWork("Refresh completed.");
         }
 
