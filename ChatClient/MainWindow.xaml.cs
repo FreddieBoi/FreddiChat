@@ -216,7 +216,7 @@ namespace FreddiChatClient {
             }
             var name = userNameTextBox.Text;
             ThreadPool.QueueUserWorkItem(delegate {
-                Send(name, message);
+                HandleCommand(name, message);
             });
         }
 
@@ -385,28 +385,49 @@ namespace FreddiChatClient {
             }
         }
 
+        private void HandleCommand(string name, string message) {
+            try {
+                // Is it a command?
+                if (message.StartsWith("/")) {
+                    var command = message.Remove(0, 1).ToLower();
+                    switch (command) {
+                        case "clear":
+                            dispatcher.Invoke(ClearText);
+                            return;
+                        case "disconnect":
+                            dispatcher.Invoke(() => EnableDisconnect(false));
+                            dispatcher.Invoke(() => EnableChat(false));
+                            Disconnect();
+                            return;
+                        case "?":
+                        case "h":
+                        case "help":
+                            dispatcher.Invoke(() => AppendText("/clear, /disconnect, /h[elp], /q[uit], /w[hisper] user message, /r[eply]", Colors.CadetBlue));
+                            return;
+                        case "q":
+                        case "quit":
+                        case "exit":
+                            dispatcher.Invoke(Close);
+                            return;
+                        case "w":
+                        case "whipser":
+                            Send(name, message);
+                            return;
+                        default:
+                            dispatcher.Invoke(() => AppendText("Invalid command.", Colors.Red));
+                            goto case "help";
+                    }
+                }
+            } catch {
+                dispatcher.Invoke(() => AppendText("Bad format on command.", Colors.Red));
+            }
+
+            // Just regular broadcast chat...
+            Send(name, message);
+        }
+
         private void Send(string name, string message) {
             try {
-                // Is this a clear command?
-                if (message.ToLower().StartsWith("/clear")) {
-                    dispatcher.Invoke(ClearText);
-                    return;
-                }
-
-                // Is this a disconnect command?
-                if (message.ToLower().StartsWith("/disconnect")) {
-                    dispatcher.Invoke(() => EnableDisconnect(false));
-                    dispatcher.Invoke(() => EnableChat(false));
-                    Disconnect();
-                    return;
-                }
-
-                // Is this a quit command?
-                if (message.ToLower().StartsWith("/q") || message.ToLower().StartsWith("/quit") || message.ToLower().StartsWith("/exit")) {
-                    Close();
-                    return;
-                }
-
                 // Is this a whisper message?
                 if (message.ToLower().StartsWith("/w ") || message.ToLower().StartsWith("/whisper ")) {
                     try {
