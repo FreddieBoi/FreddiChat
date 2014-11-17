@@ -47,6 +47,7 @@ namespace FreddiChatClient {
             InitializeComponent();
 
             dispatcher = Dispatcher.CurrentDispatcher;
+            dispatcher.UnhandledException += DispatcherUnhandledException;
 
             keepAliveTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Normal, KeepAlive, dispatcher);
         }
@@ -68,6 +69,7 @@ namespace FreddiChatClient {
         public void OnDisconnect(DateTime dateTime, bool result, string message) {
             try {
                 chatClient.Close();
+                chatClient = null;
             } catch (Exception) {
                 // Ignore any error
                 chatClient.Abort();
@@ -145,6 +147,10 @@ namespace FreddiChatClient {
 
         #region GUI event delegates
 
+        private void DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
+            // Do nothing.
+        }
+
         private void WindowLoaded(object sender, RoutedEventArgs e) {
             EnableConnect(true);
         }
@@ -155,7 +161,6 @@ namespace FreddiChatClient {
                 EnableChat(false);
                 Disconnect();
             }
-            chatClient = null;
         }
 
         private void ConnectButtonClick(object sender, RoutedEventArgs e) {
@@ -356,9 +361,9 @@ namespace FreddiChatClient {
                 // Ignore any error
                 chatClient.Abort();
             } finally {
-                dispatcher.Invoke(new Action(() => EnableChat(false)));
-                dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
+                dispatcher.Invoke(() => EnableChat(false));
+                dispatcher.Invoke(() => EnableConnect(true));
+                dispatcher.Invoke(() => EnableDisconnect(false));
             }
         }
 
@@ -377,9 +382,23 @@ namespace FreddiChatClient {
 
         private void Send(string name, string message) {
             try {
+                // Is this a clear command?
+                if (message.ToLower().StartsWith("/clear")) {
+                    dispatcher.Invoke(ClearText);
+                    return;
+                }
+
                 // Is this a disconnect command?
-                if (message.ToLower().StartsWith("/d") || message.ToLower().StartsWith("/disconnect")) {
+                if (message.ToLower().StartsWith("/disconnect")) {
+                    dispatcher.Invoke(() => EnableDisconnect(false));
+                    dispatcher.Invoke(() => EnableChat(false));
                     Disconnect();
+                    return;
+                }
+
+                // Is this a disconnect command?
+                if (message.ToLower().StartsWith("/quit") || message.ToLower().StartsWith("/exit")) {
+                    dispatcher.Invoke(Application.Current.Shutdown);
                     return;
                 }
 
@@ -394,26 +413,26 @@ namespace FreddiChatClient {
 
                         // Are the fields still valid?
                         if (string.IsNullOrEmpty(toUser) || string.IsNullOrEmpty(whisperMessage)) {
-                            dispatcher.Invoke(new Action(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red)));
+                            dispatcher.Invoke(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red));
                         }
                             // Is the user whispering himself?
                         else if (toUser.Equals(name)) {
-                            dispatcher.Invoke(new Action(() => AppendText("There is no need to whisper to yourself.", Colors.Red)));
+                            dispatcher.Invoke(() => AppendText("There is no need to whisper to yourself.", Colors.Red));
                         }
                             // Send the whisper message.
                         else {
                             try {
                                 chatClient.Whisper(name, toUser, whisperMessage);
                             } catch (Exception e) {
-                                dispatcher.Invoke(new Action(() => AppendText(string.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                                dispatcher.Invoke(new Action(() => EnableChat(false)));
-                                dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                                dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
+                                dispatcher.Invoke(() => AppendText(string.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red));
+                                dispatcher.Invoke(() => EnableChat(false));
+                                dispatcher.Invoke(() => EnableConnect(true));
+                                dispatcher.Invoke(() => EnableDisconnect(false));
                             }
                         }
                         return;
                     } catch (Exception) {
-                        dispatcher.Invoke(new Action(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red)));
+                        dispatcher.Invoke(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red));
                         return;
                     }
                 }
@@ -421,11 +440,15 @@ namespace FreddiChatClient {
                 // Broadcast instead
                 chatClient.Broadcast(name, message);
             } catch (Exception e) {
-                dispatcher.Invoke(new Action(() => AppendText(string.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                dispatcher.Invoke(new Action(() => EnableChat(false)));
-                dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
+                dispatcher.Invoke(() => AppendText(string.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red));
+                dispatcher.Invoke(() => EnableChat(false));
+                dispatcher.Invoke(() => EnableConnect(true));
+                dispatcher.Invoke(() => EnableDisconnect(false));
             }
+        }
+
+        private void ClearText() {
+            chatTextBox.Document.Blocks.Clear();
         }
 
         private void AppendText(string text, Color color) {
