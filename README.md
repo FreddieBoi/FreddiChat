@@ -22,7 +22,7 @@ Features
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
 + **Reply** to last received whisper (type `/r `)
 + **Clear** chat history (type `/clear`)
-+ **Disconnect** from server (type `/disconnect)
++ **Disconnect** from server (type `/disconnect`)
 + **Quit** at any time (type `/quit`)
 
 Modes
