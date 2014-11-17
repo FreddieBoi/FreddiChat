@@ -17,10 +17,13 @@ The source consists of two projects.
 
 Features
 --------
-+ **Connect** to (or **Disconnect** from) any server, at any time, using desired name
++ **Connect** to any server using desired name
 + **Broadcast** messages to all users
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
 + **Reply** to last received whisper (type `/r `)
++ **Clear** chat history (type `/clear`)
++ **Disconnect** from server (type `/disconnect)
++ **Quit** at any time (type `/quit`)
 
 Modes
 -----
