@@ -21,6 +21,8 @@ Features
 + **Broadcast** messages to all users
 + **Whisper** message to specific user (double-click desired name or type `/w username`)
 + **Reply** to last received whisper (type `/r `)
++ **Links** are automatically marked up and clickable
++ **History** of previous commands or messages (use up and down arrow keys)
 + **Clear** chat history (type `/clear`)
 + **Disconnect** from server (type `/disconnect`)
 + **Quit** at any time (type `/quit`)
