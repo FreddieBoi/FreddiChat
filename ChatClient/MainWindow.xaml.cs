@@ -390,6 +390,14 @@ namespace FreddiChatClient {
                 // Is it a command?
                 if (message.StartsWith("/")) {
                     var command = message.Remove(0, 1).ToLower();
+
+                    // Special handling of commands with arguments
+                    if (command.StartsWith("w") || command.StartsWith("whipser")) {
+                        Send(name, message);
+                        return;
+                    }
+
+                    // Handle all commands without arguments
                     switch (command) {
                         case "clear":
                             dispatcher.Invoke(ClearText);
@@ -408,10 +416,6 @@ namespace FreddiChatClient {
                         case "quit":
                         case "exit":
                             dispatcher.Invoke(Close);
-                            return;
-                        case "w":
-                        case "whipser":
-                            Send(name, message);
                             return;
                         default:
                             dispatcher.Invoke(() => AppendText("Invalid command.", Colors.Red));
