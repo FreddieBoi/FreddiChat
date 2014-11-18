@@ -526,12 +526,12 @@ namespace FreddiChatClient {
 
             // Try to extract URLs and make them clickable
             foreach (var partialText in UrlExtractor.Extract(text)) {
-                if (partialText.Value) {
+                if (partialText.Value != null) {
                     var linkTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
                         Text = partialText.Key
                     };
                     var link = new Hyperlink(linkTextRange.Start, linkTextRange.End);
-                    link.NavigateUri = new Uri(partialText.Key);
+                    link.NavigateUri = partialText.Value;
                     link.RequestNavigate += LinkRequestNavigate;
                 } else {
                     var regularTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
