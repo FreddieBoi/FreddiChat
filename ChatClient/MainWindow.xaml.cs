@@ -10,8 +10,10 @@ using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Navigation;
 using System.Windows.Threading;
 using FreddiChatClient.ChatServiceReference;
+﻿using System.Diagnostics;
 
 namespace FreddiChatClient {
 
@@ -268,6 +270,12 @@ namespace FreddiChatClient {
             }
         }
 
+        private void LinkRequestNavigate(object sender, RequestNavigateEventArgs e) {
+            if (e.Uri != null) {
+                Process.Start(new ProcessStartInfo(e.Uri.ToString()));
+            }
+        }
+
         #endregion
 
         #region Private helpers
@@ -494,31 +502,52 @@ namespace FreddiChatClient {
         }
 
         private void AppendText(DateTime dateTime, string sender, string senderInfo, string text, Color color) {
-            // Create a textrange at the very end of the chat text box, extend the range with the new text.
-            var textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+            // Create a textrange at the very end of the chat text box, extend the range with the new text
+            var timestampTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
                 Text = string.Format("[{0}] ", dateTime)
             };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            // Colorize the timestamp
+            timestampTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            timestampTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+            var senderTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
                 Text = string.Format("{0}", sender)
             };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
-            // Make it bold.
-            textRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+            // Colorize the sender and make it bold
+            senderTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            senderTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
-                Text = string.IsNullOrEmpty(senderInfo) ? string.Format(": {0}", text) : string.Format(" {0}: {1}", senderInfo, text)
+            var senderInfoTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = string.IsNullOrWhiteSpace(senderInfo) ? ": " : string.Format(" {0}: ", senderInfo)
             };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
-            // Make it normal
-            textRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+            // Colorize the sender info
+            senderInfoTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            senderInfoTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
-            // Add a new line
-            chatTextBox.AppendText(Environment.NewLine);
+            // Try to extract URLs and make them clickable
+            foreach (var partialText in UrlExtractor.Extract(text)) {
+                if (partialText.Value) {
+                    var linkTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                        Text = partialText.Key
+                    };
+                    var link = new Hyperlink(linkTextRange.Start, linkTextRange.End);
+                    link.NavigateUri = new Uri(partialText.Key);
+                    link.RequestNavigate += LinkRequestNavigate;
+                } else {
+                    var regularTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                        Text = partialText.Key
+                    };
+                    // Colorize the text
+                    regularTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+                    regularTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+                }
+            }
+
+            // Add a new line and reset styles
+            var resetTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = Environment.NewLine
+            };
+            resetTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
             // Scroll to end of chat text if ScrollLock isn't on
             var scrollLock = (((ushort)GetKeyState(0x91)) & 0xffff) != 0;

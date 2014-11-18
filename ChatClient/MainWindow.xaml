@@ -32,7 +32,7 @@
                 <MenuItem Header="_About" Click="AboutMenuItemClick" />
             </MenuItem>
         </Menu>
-        <RichTextBox Height="394" HorizontalAlignment="Left" Margin="146,56,0,0" Name="chatTextBox" VerticalAlignment="Top" Width="632" IsReadOnly="True" AcceptsReturn="False" VerticalScrollBarVisibility="Auto">
+        <RichTextBox Height="394" HorizontalAlignment="Left" Margin="146,56,0,0" Name="chatTextBox" VerticalAlignment="Top" Width="632" IsReadOnly="True" IsDocumentEnabled="True" AcceptsReturn="False" VerticalScrollBarVisibility="Auto">
             <RichTextBox.Resources>
                 <Style TargetType="{x:Type Paragraph}">
                     <Setter Property="Margin" Value="0"/>
