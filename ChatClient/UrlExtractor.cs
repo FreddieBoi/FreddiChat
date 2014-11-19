@@ -11,7 +11,7 @@ namespace FreddiChatClient {
 
         private static readonly Regex matcher = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly List<string> validUriSchemes = new List<string> { Uri.UriSchemeFile, Uri.UriSchemeFtp, Uri.UriSchemeHttp, Uri.UriSchemeHttps, Uri.UriSchemeMailto };
+        private static readonly List<string> validUriSchemes = new List<string> { Uri.UriSchemeHttp, Uri.UriSchemeHttps };
 
         /// <summary>
         /// Process the specified <code>text</code> and convert to a list of key-value pairs.
