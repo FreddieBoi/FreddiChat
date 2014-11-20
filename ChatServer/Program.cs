@@ -18,11 +18,14 @@ namespace FreddieChatServer {
             ConsoleUtils.TraceSystemWork("Configuring server...");
 
             // Select server protocol
-            var protocol = ConsoleUtils.ReadCommand("Select server protocol", "http", "net.pipe");
+            var protocol = ConsoleUtils.ReadCommand("Select server protocol", "http", "net.pipe", "net.tcp");
             IChatServiceMode mode;
             switch (protocol) {
                 case "net.pipe":
-                    mode = new NetNamedPipeChatServiceMode();
+                    mode = new NamedPipeChatServiceMode();
+                    break;
+                case "net.tcp":
+                    mode = new TcpChatServiceMode();
                     break;
                 case "http":
                 default:

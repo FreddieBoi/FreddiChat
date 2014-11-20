@@ -19,7 +19,7 @@ Features
 --------
 + **Connect** to any server using desired name
 + **Broadcast** messages to all users
-+ **Whisper** message to specific user (double-click desired name or type `/w username`)
++ **Whisper** message to specific user (double-click desired name or type `/w user`)
 + **Reply** to last received whisper (type `/r `)
 + **Links** are automatically marked up and clickable
 + **History** of previous commands or messages (use up and down arrow keys)
@@ -31,6 +31,11 @@ Modes
 -----
 + **Named Pipe** using the `NetNamedPipeBinding`, e.g. `net.pipe://localhost/FreddiChat/`
 + **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
++ **TCP** using the `NetTcpBinding`, e.g. `net.tcp://localhost/FreddiChat/`
+
+Security
+--------
+*Warning*: No security is applied for connections. Security mode `None` is used. Anyone can access the service and messages are not encrypted.
 
 Getting started
 ---------------

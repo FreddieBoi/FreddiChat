@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace FreddieChatServer.Modes {
 
     /// <summary>
-    /// Service mode used for Named Pipe (NetNamedPipeBinding).
+    /// Service mode used for TCP (NetTcpBinding).
     /// </summary>
-    public class NetNamedPipeChatServiceMode : IChatServiceMode {
+    public class TcpChatServiceMode : IChatServiceMode {
 
         public string Protocol {
             get {
-                return "net.pipe";
+                return "net.tcp";
             }
         }
 
@@ -44,9 +44,11 @@ namespace FreddieChatServer.Modes {
         /// <summary>
         /// Constructor.
         /// </summary>
-        public NetNamedPipeChatServiceMode() {
-            ServiceEndpointBinding = new NetNamedPipeBinding();
-            ServiceMetadataBinding = MetadataExchangeBindings.CreateMexNamedPipeBinding();
+        public TcpChatServiceMode() {
+            var binding = new NetTcpBinding();
+            binding.Security.Mode = SecurityMode.None;
+            ServiceEndpointBinding = binding;
+            ServiceMetadataBinding = MetadataExchangeBindings.CreateMexTcpBinding();
             ServiceBehavior = new ServiceMetadataBehavior {
                 MetadataExporter = {
                     PolicyVersion = PolicyVersion.Policy15

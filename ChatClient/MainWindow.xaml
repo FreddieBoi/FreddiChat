@@ -39,7 +39,7 @@
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="13,28,0,0" Name="userNameTextBox" VerticalAlignment="Top" Width="128" Text="Anonymous" ToolTip="Username" TabIndex="0" />
+        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,28,0,0" Name="userNameTextBox" VerticalAlignment="Top" Width="129" Text="Anonymous" ToolTip="Username" TabIndex="0" />
         <Button Height="23" HorizontalAlignment="Left" Margin="727,28,0,0" Name="connectButton" VerticalAlignment="Top" Width="23" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect" TabIndex="4">
             <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Connect.png" />
         </Button>
@@ -53,7 +53,8 @@
         <TextBox Height="23" HorizontalAlignment="Left" Margin="659,28,0,0" Name="portTextBox" VerticalAlignment="Top" Width="64" Text="8080" ToolTip="Server port" TabIndex="3" />
         <ComboBox Height="23" HorizontalAlignment="Left" Margin="146,28,0,0" Name="protocolComboBox" VerticalAlignment="Top" Width="92" ToolTip="Server protocol" TabIndex="1">
             <ComboBoxItem IsSelected="True">HTTP</ComboBoxItem>
-            <ComboBoxItem >Named Pipe</ComboBoxItem>
+            <ComboBoxItem>Named Pipe</ComboBoxItem>
+            <ComboBoxItem>TCP</ComboBoxItem>
         </ComboBox>
     </Grid>
 </Window>

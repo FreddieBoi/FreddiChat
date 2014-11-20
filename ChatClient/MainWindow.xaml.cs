@@ -342,6 +342,11 @@ namespace FreddiChatClient {
                         port = string.Empty;
                         binding = new NetNamedPipeBinding();
                         break;
+                    case "TCP":
+                        protocol = "net.tcp";
+                        port = string.Empty;
+                        binding = new NetTcpBinding();
+                        break;
                     case "HTTP":
                     default:
                         protocol = "http";
