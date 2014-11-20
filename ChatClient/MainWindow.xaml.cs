@@ -340,12 +340,16 @@ namespace FreddiChatClient {
                     case "Named Pipe":
                         protocol = "net.pipe";
                         port = string.Empty;
-                        binding = new NetNamedPipeBinding();
+                        var namedPipeBinding = new NetNamedPipeBinding();
+                        namedPipeBinding.Security.Mode = NetNamedPipeSecurityMode.None;
+                        binding = namedPipeBinding;
                         break;
                     case "TCP":
                         protocol = "net.tcp";
                         port = string.Empty;
-                        binding = new NetTcpBinding();
+                        var tcpBinding = new NetTcpBinding();
+                        tcpBinding.Security.Mode = SecurityMode.None;
+                        binding = tcpBinding;
                         break;
                     case "HTTP":
                     default:
