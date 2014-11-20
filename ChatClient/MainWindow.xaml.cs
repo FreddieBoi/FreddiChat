@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -25,6 +26,11 @@ namespace FreddiChatClient {
 
         #region Private fields
 
+        private const string applicationName = "FreddiChat";
+        private static readonly Version applicationVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static readonly string applicationVersionName = string.Format("v{0}.{1}", applicationVersion.Major, applicationVersion.Minor, applicationVersion.Build, applicationVersion.Revision);
+        private static readonly string applicationVersionVerboseName = string.Format("v{0}.{1} Patch {2} Build {3}", applicationVersion.Major, applicationVersion.Minor, applicationVersion.Build, applicationVersion.Revision);
+
         private ChatServiceClient chatClient;
 
         private readonly Dispatcher dispatcher;
@@ -47,6 +53,8 @@ namespace FreddiChatClient {
         /// </summary>
         public MainWindow() {
             InitializeComponent();
+
+            Title = string.Format("{0} {1}", applicationName, applicationVersionName);
 
             dispatcher = Dispatcher.CurrentDispatcher;
             dispatcher.UnhandledException += DispatcherUnhandledException;
@@ -255,8 +263,12 @@ namespace FreddiChatClient {
         }
 
         private void AboutMenuItemClick(object sender, RoutedEventArgs e) {
-            MessageBox.Show("FreddiChat is a chat client by Fredrik Pettersson.",
-                "About FreddiChat", MessageBoxButton.OK,
+            var title = string.Format("About {0} {1}", applicationName, applicationVersionName);
+            var message = string.Format("{0} {1}{2}{2}A simple chat client and server solution written in C# using WCF (client, server) and WPF (client) by FreddieBoi.",
+                applicationName,
+                applicationVersionVerboseName,
+                Environment.NewLine);
+            MessageBox.Show(message, title, MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }
 
@@ -427,6 +439,7 @@ namespace FreddiChatClient {
                         case "?":
                         case "h":
                         case "help":
+                            dispatcher.Invoke(() => AppendText(string.Format("{0} {1}", applicationName, applicationVersionVerboseName), Colors.CadetBlue));
                             dispatcher.Invoke(() => AppendText("/clear, /disconnect, /h[elp], /q[uit], /w[hisper] user message, /r[eply]", Colors.CadetBlue));
                             return;
                         case "q":
