@@ -68,8 +68,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatService.cs" />
-    <Compile Include="Modes\NetTcpChatServiceMode.cs" />
-    <Compile Include="Modes\NetNamedPipeChatServiceMode.cs" />
+    <Compile Include="Modes\TcpChatServiceMode.cs" />
+    <Compile Include="Modes\NamedPipeChatServiceMode.cs" />
     <Compile Include="Modes\HttpChatServiceMode.cs" />
     <Compile Include="Modes\IChatServiceMode.cs" />
     <Compile Include="Utils\ConsoleUtils.cs" />
