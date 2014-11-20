@@ -114,6 +114,15 @@ namespace FreddieChatServer.Utils {
         }
 
         /// <summary>
+        /// Trace service system work.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="arg"></param>
+        public static void TraceSystemInfo(string format, params object[] arg) {
+            TraceSystem(ConsoleColor.Green, format, arg);
+        }
+
+        /// <summary>
         /// Trace service system warning.
         /// </summary>
         /// <param name="format"></param>

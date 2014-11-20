@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
@@ -12,9 +13,15 @@ namespace FreddieChatServer {
 
     public class Program {
 
+        private const string applicationName = "FreddiChat (server)";
+        private static readonly Version applicationVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static readonly string applicationVersionVerboseName = string.Format("v{0}.{1} Patch {2} Build {3}", applicationVersion.Major, applicationVersion.Minor, applicationVersion.Build, applicationVersion.Revision);
+
         private static readonly List<string> exitCommands = new List<string> { "q", "exit", "quit" };
 
         public static void Main(string[] args) {
+            ConsoleUtils.TraceSystemInfo("{0} {1}", applicationName, applicationVersionVerboseName);
+
             ConsoleUtils.TraceSystemWork("Configuring server...");
 
             // Select server protocol
