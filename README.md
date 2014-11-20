@@ -6,14 +6,8 @@ Implementation
 --------------
 The source consists of two projects.
 
-+ The client side implementation [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github")
-+ The server side implementation [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github")
-
-### FreddiChatClient ###
-[FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
-
-### FreddiChatServer ###
-[FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application. It only provides very limited possibility for interaction and configuration of the server, it just displays relevant calls to and operations of the server.
++ [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
++ [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application, which provides a chat service. It displays relevant calls to and operations of the server, providing very limited interaction and configuration.
 
 Features
 --------
