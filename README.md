@@ -1,6 +1,6 @@
 FreddiChat
 ==========
-FreddiChat is a simple chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding or WSDualHttpBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
+FreddiChat is a simple chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding, NetTcpBinding or WSDualHttpBinding for connections. In its looks and interaction patterns it is rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
 
 Implementation
 --------------
@@ -30,12 +30,14 @@ Features
 Modes
 -----
 + **Named Pipe** using the `NetNamedPipeBinding`, e.g. `net.pipe://localhost/FreddiChat/`
-+ **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
 + **TCP** using the `NetTcpBinding`, e.g. `net.tcp://localhost/FreddiChat/`
++ **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
 
 Security
 --------
-*Warning*: No security is applied for connections. Security mode `None` is used. Anyone can access the service and messages are not encrypted.
+*Warning: No security is applied for connections.*
+
+Security mode `None` is used. Anyone can access the service and messages are not encrypted.
 
 Getting started
 ---------------
