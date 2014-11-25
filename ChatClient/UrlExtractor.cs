@@ -9,9 +9,9 @@ namespace FreddiChatClient {
 
     public static class UrlExtractor {
 
-        private static readonly Regex matcher = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex chatUrlMatcher = new Regex(@"\b(?:https?://|www\.)\S+\b", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private static readonly List<string> validUriSchemes = new List<string> { Uri.UriSchemeHttp, Uri.UriSchemeHttps };
+        private static readonly List<string> validChatUriSchemes = new List<string> { Uri.UriSchemeHttp, Uri.UriSchemeHttps };
 
         /// <summary>
         /// Process the specified <code>text</code> and convert to a list of key-value pairs.
@@ -26,14 +26,17 @@ namespace FreddiChatClient {
 
             var lastMatchIndex = 0;
 
-            foreach (Match match in matcher.Matches(text)) {
+            foreach (Match match in chatUrlMatcher.Matches(text)) {
                 // Add non-URL (the text up until this match)
                 extracted.Add(new KeyValuePair<string, Uri>(text.Substring(0, match.Index), null));
 
                 // Add URL if valid, otherwise just add as non-URL
                 var url = text.Substring(match.Index, match.Length);
+                if (url.StartsWith("www")) {
+                    url = string.Format("http://{0}", url);
+                }
                 Uri uri;
-                TryCreate(url, out uri);
+                TryCreate(url, out uri, validChatUriSchemes);
                 extracted.Add(new KeyValuePair<string, Uri>(url, uri));
 
                 lastMatchIndex = match.Index + match.Length;
@@ -48,14 +51,10 @@ namespace FreddiChatClient {
         /// <summary>
         /// Try to create a <see cref="Uri"/> from the specified <code>url</code>.
         /// </summary>
-        /// <remarks>Prepends "http://" for invalid "www" links</remarks>
         /// <param name="url">The URL to create an URI for</param>
         /// <param name="uri">The created URI or <code>null</code> if invalid</param>
         /// <returns><code>true</code> if the URL is valid, <code>false</code> otherwise</returns>
-        private static bool TryCreate(string url, out Uri uri) {
-            if (url.StartsWith("www")) {
-                url = string.Format("http://{0}", url);
-            }
+        public static bool TryCreate(string url, out Uri uri, IEnumerable<string> validUriSchemes) {
             return Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri) && validUriSchemes.Contains(uri.Scheme);
         }
 

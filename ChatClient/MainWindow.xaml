@@ -2,59 +2,26 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:FreddiChatClient="clr-namespace:FreddiChatClient"
-        Title="{Binding Title}" Height="600" Width="800" Loaded="WindowLoaded" 
-        Closing="WindowClosing" ResizeMode="CanMinimize">
-    <Window.CommandBindings>
-        <CommandBinding Command="FreddiChatClient:CustomCommands.Connect" Executed="ConnectButtonClick" />
-        <CommandBinding Command="FreddiChatClient:CustomCommands.Disconnect" Executed="DisconnectButtonClick" />
-    </Window.CommandBindings>
-    <Window.InputBindings>
-        <KeyBinding Key="C" Modifiers="Control+Shift" Command="FreddiChatClient:CustomCommands.Connect"/>
-        <KeyBinding Key="D" Modifiers="Control+Shift" Command="FreddiChatClient:CustomCommands.Disconnect"/>
-    </Window.InputBindings>
+        Title="{Binding Title}" Height="600" Width="800" 
+        Closing="WindowClosing" Loaded="WindowLoaded"
+        ResizeMode="CanMinimize">
     <Grid>
         <Menu IsMainMenu="True" VerticalAlignment="Top">
             <MenuItem Header="_File" >
-                <MenuItem Name="connectMenuItem" Header="_Connect" Click="ConnectButtonClick" InputGestureText="Ctrl+Shft+C">
-                    <MenuItem.Icon>
-                        <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Connect.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Name="disconnectMenuItem" Header="_Disconnect" Click="DisconnectButtonClick" InputGestureText="Ctrl+Shft+D" IsEnabled="False">
-                    <MenuItem.Icon>
-                        <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Disconnect.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <Separator />
                 <MenuItem Header="E_xit" Click="ExitMenuItemClick" InputGestureText="Alt+F4" />
             </MenuItem>
             <MenuItem Header="_Help">
                 <MenuItem Header="_About" Click="AboutMenuItemClick" />
             </MenuItem>
         </Menu>
-        <RichTextBox Height="394" HorizontalAlignment="Left" Margin="146,56,0,0" Name="chatTextBox" VerticalAlignment="Top" Width="632" IsReadOnly="True" IsDocumentEnabled="True" AcceptsReturn="False" VerticalScrollBarVisibility="Auto">
+        <RichTextBox HorizontalAlignment="Left" Margin="146,26,0,0" Name="chatTextBox" Width="632" IsReadOnly="True" IsDocumentEnabled="True" AcceptsReturn="False" VerticalScrollBarVisibility="Auto" Height="457" VerticalAlignment="Top">
             <RichTextBox.Resources>
                 <Style TargetType="{x:Type Paragraph}">
                     <Setter Property="Margin" Value="0"/>
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="12,28,0,0" Name="userNameTextBox" VerticalAlignment="Top" Width="129" Text="Anonymous" ToolTip="Username" TabIndex="0" />
-        <Button Height="23" HorizontalAlignment="Left" Margin="727,28,0,0" Name="connectButton" VerticalAlignment="Top" Width="23" IsDefault="True" Click="ConnectButtonClick" ToolTip="Connect" TabIndex="4">
-            <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Connect.png" />
-        </Button>
-        <Button Height="23" HorizontalAlignment="Left" Margin="755,28,0,0" Name="disconnectButton" VerticalAlignment="Top" Width="23" Click="DisconnectButtonClick" IsEnabled="False" ToolTip="Disconnect" TabIndex="5">
-            <FreddiChatClient:GreyscaleOnDisabledImage Source="Images\Disconnect.png" />
-        </Button>
-        <ListBox Height="464" HorizontalAlignment="Left" Margin="12,56,0,0" Name="userListBox" VerticalAlignment="Top" Width="128" ItemsSource="{Binding}" Focusable="False" MouseDoubleClick="UserListBoxMouseDoubleClick" />
-        <TextBox Height="64" HorizontalAlignment="Left" Margin="146,456,0,0" Name="messageTextBox" VerticalAlignment="Top" Width="632" IsEnabled="False" PreviewKeyDown="MessageTextBoxPreviewKeyDown" TextChanged="MessageTextBoxTextChanged" MaxLength="256" TabIndex="3" />
-        <Button Content="Send" Height="23" HorizontalAlignment="Left" Margin="703,526,0,0" Name="sendButton" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="SendButtonClick" />
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="243,28,0,0" Name="hostNameTextBox" VerticalAlignment="Top" Width="411" Text="localhost" ToolTip="Server hostname or IP" TabIndex="2" />
-        <TextBox Height="23" HorizontalAlignment="Left" Margin="659,28,0,0" Name="portTextBox" VerticalAlignment="Top" Width="64" Text="8080" ToolTip="Server port" TabIndex="3" />
-        <ComboBox Height="23" HorizontalAlignment="Left" Margin="146,28,0,0" Name="protocolComboBox" VerticalAlignment="Top" Width="92" ToolTip="Server protocol" TabIndex="1">
-            <ComboBoxItem IsSelected="True">HTTP</ComboBoxItem>
-            <ComboBoxItem>Named Pipe</ComboBoxItem>
-            <ComboBoxItem>TCP</ComboBoxItem>
-        </ComboBox>
+        <ListBox Height="526" HorizontalAlignment="Left" Margin="12,26,0,0" Name="userListBox" VerticalAlignment="Top" Width="128" ItemsSource="{Binding}" Focusable="False" MouseDoubleClick="UserListBoxMouseDoubleClick" />
+        <TextBox Height="64" HorizontalAlignment="Left" Margin="146,488,0,0" Name="messageTextBox" VerticalAlignment="Top" Width="632" PreviewKeyDown="MessageTextBoxPreviewKeyDown" TextChanged="MessageTextBoxTextChanged" MaxLength="256" TabIndex="3" />
     </Grid>
 </Window>
