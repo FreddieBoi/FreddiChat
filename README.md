@@ -53,7 +53,7 @@ Follow the steps below to regenerate the service client.
     + Select `net.pipe` as protocol when prompted
     + Select `localhost` as hostname when prompted
 4. Start `Developer Command Prompt` for `Visual Studio`
-5. Execute `svcutil.exe /language:cs /noConfig /n:*,FreddiChatClient.Communications /out:FreddiChat\ChatClient\Communications\GeneratedChatServiceClient.cs net.pipe://localhost/FreddiChat/mex` to regenerate the service client
+5. Execute `svcutil.exe /language:cs /noConfig /namespace:*,FreddiChatClient.Communications /out:FreddiChat\ChatClient\Communications\GeneratedChatServiceClient.cs net.pipe://localhost/FreddiChat/mex` to regenerate the service client
 
 License
 -------
