@@ -1,6 +1,6 @@
 ﻿using System.ServiceModel;
 
-namespace FreddieChatServer.Contracts {
+namespace FreddieChatServer.Communications {
 
     [ServiceContract(SessionMode = SessionMode.Required, CallbackContract = typeof(IChatCallbackContract))]
     public interface IChatService {

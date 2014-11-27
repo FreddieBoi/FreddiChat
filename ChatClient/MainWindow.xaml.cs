@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Navigation;
 using System.Windows.Threading;
 ﻿using System.Diagnostics;
+using FreddiChatClient.Utils;
 
 namespace FreddiChatClient {
 

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.ServiceModel;
 using System.Timers;
-using FreddieChatServer.Contracts;
+using FreddieChatServer.Communications;
 using FreddieChatServer.Managers;
 using FreddieChatServer.Utils;
 
-namespace FreddieChatServer {
+namespace FreddieChatServer.Communications {
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class ChatService : IChatService {

@@ -38,16 +38,26 @@ Getting started
 Follow the steps below to build the server and the client.
 
 1. Open `FreddiChat.sln` in `Visual Studio`
+2. Select `Build Solution` to build the server and the client
+3. Browse to `FreddiChat\ChatServer\bin\Debug` and execute `FreddieChatServer.exe` to start the server
+    + Select `net.pipe` as protocol when prompted
+    + Select `localhost` as hostname when prompted
+9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
+    + Type `/connect Anonymous net.pipe://localhost` to connect
+
+Code generation
+---------------
+The service client is generated using the ServiceModel Metadata Utility Tool (`svcutil.exe`). It must be regenerated when changing the service contracts.
+
+Follow the steps below to regenerate the service client.
+
+1. Open `FreddiChat.sln` in `Visual Studio`
 2. Right-click the `FreddiChatServer` project and select `Build` to build the server
 3. Browse to `FreddiChat\ChatServer\bin\Debug` and execute `FreddieChatServer.exe` to start the server
     + Select `net.pipe` as protocol when prompted
-4. Right-click the `FreddiChatClient` project and select `Add Service Reference`
-    + Use `net.pipe://localhost/FreddiChat/mex` as address for the service reference
-    + Use `ChatServiceReference` as name for the service reference
-    + Press `OK` to create the service reference
-8. Right-click the `FreddiChatClient` project and select `Build` to build the client
-9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
-    + Type `/connect Anonymous net.pipe://localhost` to connect
+    + Select `localhost` as hostname when prompted
+4. Start `Developer Command Prompt` for `Visual Studio`
+5. Execute `svcutil.exe /language:cs /noConfig /n:*,FreddiChatClient.Communications /out:FreddiChat\ChatClient\Communications\GeneratedChatServiceClient.cs net.pipe://localhost/FreddiChat/mex` to regenerate the service client
 
 License
 -------

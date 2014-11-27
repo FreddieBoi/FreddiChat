@@ -4,7 +4,7 @@ using System.Reflection;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.ServiceModel.Security;
-using FreddieChatServer.Contracts;
+using FreddieChatServer.Communications;
 using FreddieChatServer.Managers;
 using FreddieChatServer.Modes;
 using FreddieChatServer.Utils;

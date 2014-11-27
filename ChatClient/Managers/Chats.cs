@@ -4,9 +4,10 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
-using FreddiChatClient.ChatServiceReference;
 using System.Windows.Threading;
 using System.ServiceModel.Channels;
+using FreddiChatClient.Communications;
+using FreddiChatClient.Utils;
 
 namespace FreddiChatClient {
 

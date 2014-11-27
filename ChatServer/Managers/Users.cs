@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
-using FreddieChatServer.Contracts;
+using FreddieChatServer.Communications;
 
 namespace FreddieChatServer.Managers {
 
