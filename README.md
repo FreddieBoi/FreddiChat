@@ -2,13 +2,6 @@ FreddiChat
 ==========
 FreddiChat is a simple chat client and server solution written in C# using WCF (client, server) and WPF (client). It uses NetNamedPipeBinding, NetTcpBinding or WSDualHttpBinding for connections. It's minimalistic in its looks and its interaction patterns are rather similar to mIRC or other channel based clients. FreddiChat however only provides one channel per server.
 
-Implementation
---------------
-The source consists of two projects.
-
-+ [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
-+ [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application, which provides a chat service. It displays relevant calls to and operations of the server, providing very limited interaction and configuration.
-
 Features
 --------
 + **Connect** to any server using desired name (type `/connect user host`)
@@ -21,20 +14,14 @@ Features
 + **Disconnect** from server (type `/disconnect`)
 + **Quit** at any time (type `/quit`)
 
-Modes
------
-+ **Named Pipe** using the `NetNamedPipeBinding`, e.g. `net.pipe://localhost/FreddiChat/`
-+ **TCP** using the `NetTcpBinding`, e.g. `net.tcp://localhost/FreddiChat/`
-+ **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
+Implementation
+--------------
+The source consists of two projects.
 
-Security
---------
-*Warning: No security is applied for connections.*
++ [FreddiChatClient](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatClient "FreddiChatClient on github") is a WPF application, which provides the user with an interface to connect to servers and chat with other users.
++ [FreddiChatServer](https://github.com/FreddieBoi/FreddiChat/tree/master/ChatServer "FreddiChatServer on github") is a console application, which provides a chat service. It displays relevant calls to and operations of the server, providing very limited interaction and configuration.
 
-Security mode `None` is used. Anyone can access the service and messages are not encrypted.
-
-Getting started
----------------
+### Getting started
 Follow the steps below to build the server and the client.
 
 1. Open `FreddiChat.sln` in `Visual Studio`
@@ -42,11 +29,20 @@ Follow the steps below to build the server and the client.
 3. Browse to `FreddiChat\ChatServer\bin\Debug` and execute `FreddieChatServer.exe` to start the server
     + Select `net.pipe` as protocol when prompted
     + Select `localhost` as hostname when prompted
-9. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
+4. Browse to `FreddiChat\ChatClient\bin\Debug` and execute `FreddieChatClient.exe` to start a client
     + Type `/connect Anonymous net.pipe://localhost` to connect
 
-Code generation
----------------
+### Modes
++ **Named Pipe** using the `NetNamedPipeBinding`, e.g. `net.pipe://localhost/FreddiChat/`
++ **TCP** using the `NetTcpBinding`, e.g. `net.tcp://localhost/FreddiChat/`
++ **HTTP** using the `WSDualHttpBinding` (a port must be specified), e.g. `http://localhost:8080/FreddiChat/`
+
+### Security
+*Warning: No security is applied for connections.*
+
+Security mode `None` is used. Anyone can access the service and messages are not encrypted.
+
+### Code generation
 The service client is generated using the ServiceModel Metadata Utility Tool (`svcutil.exe`). It must be regenerated when changing the service contracts.
 
 Follow the steps below to regenerate the service client.
