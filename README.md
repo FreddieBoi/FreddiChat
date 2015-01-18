@@ -55,6 +55,10 @@ Follow the steps below to regenerate the service client.
 4. Start `Developer Command Prompt` for `Visual Studio`
 5. Execute `svcutil.exe /language:cs /noConfig /namespace:*,FreddiChatClient.Communications /out:FreddiChat\ChatClient\Communications\GeneratedChatServiceClient.cs net.pipe://localhost/FreddiChat/mex` to regenerate the service client
 
+Build status
+------------
+[![Build Status](https://travis-ci.org/FreddieBoi/FreddiChat.svg?branch=master)](https://travis-ci.org/FreddieBoi/FreddiChat)
+
 License
 -------
 FreddiChat is written by [FreddieBoi](https://github.com/FreddieBoi "FreddieBoi on github"). See the [LICENSE](https://github.com/FreddieBoi/FreddiChat/blob/master/LICENSE) file for license rights and limitations (BEER-WARE).
