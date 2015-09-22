@@ -57,7 +57,7 @@ Follow the steps below to regenerate the service client.
 
 Build status
 ------------
-[![Build Status](https://travis-ci.org/FreddieBoi/FreddiChat.svg?branch=master)](https://travis-ci.org/FreddieBoi/FreddiChat)
+[![Build status](https://ci.appveyor.com/api/projects/status/ucsjr4p7011d6sve?svg=true)](https://ci.appveyor.com/project/FreddieBoi/freddichat)
 
 License
 -------
