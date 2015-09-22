@@ -1,204 +1,167 @@
-﻿using System;
+using System;
+using System.ComponentModel;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using FreddiChatClient.ChatServiceReference;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using System.ServiceModel;
-using System.Runtime.InteropServices;
+using System.Windows.Navigation;
 using System.Windows.Threading;
-using System.Threading;
 using System.Diagnostics;
+using FreddiChatClient.Utils;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace FreddiChatClient {
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    [CallbackBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, UseSynchronizationContext = false)]
-    public partial class MainWindow : MetroWindow, IChatServiceCallback {
+    public partial class MainWindow {
 
-        private ChatServiceClient _chatClient;
+        #region Private fields
 
-        private readonly Dispatcher _dispatcher;
+        private const string applicationName = "FreddiChat";
+        private static readonly Version applicationVersion = Assembly.GetExecutingAssembly().GetName().Version;
+        private static readonly string applicationVersionName = string.Format("v{0}.{1}", applicationVersion.Major, applicationVersion.Minor, applicationVersion.Build, applicationVersion.Revision);
+        private static readonly string applicationVersionVerboseName = string.Format("v{0}.{1} Patch {2} Build {3}", applicationVersion.Major, applicationVersion.Minor, applicationVersion.Build, applicationVersion.Revision);
 
-        private readonly DispatcherTimer _keepAliveTimer;
+        private readonly Dispatcher dispatcher;
 
-        private readonly List<string> _messageHistory = new List<string> { String.Empty };
+        private readonly Chats chats;
 
-        private int _messageHistoryIndex;
+        private readonly List<string> messageHistory = new List<string> { string.Empty };
 
-        private string _respondToUser;
+        private int messageHistoryIndex;
+
+        private string respondToUser;
+
+        #endregion
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true, CallingConvention = CallingConvention.Winapi)]
         public static extern short GetKeyState(int keyCode);
 
+        /// <summary>
+        /// Constructor.
+        /// </summary>
         public MainWindow() {
             InitializeComponent();
 
-            _dispatcher = Dispatcher.CurrentDispatcher;
+            dispatcher = Dispatcher.CurrentDispatcher;
+            dispatcher.UnhandledException += DispatcherUnhandledException;
 
-            _keepAliveTimer = new DispatcherTimer(TimeSpan.FromSeconds(30), DispatcherPriority.Normal, KeepAlive, _dispatcher);
+            // Listen to chat events
+            chats = new Chats(dispatcher);
+            chats.ConnectionFailed += ConnectionFailedHandler;
+            chats.Connected += ConnectedHandler;
+            chats.UserConnected += UserConnectedHandler;
+            chats.Disconnected += DisconnectedHandler;
+            chats.UserDisconnected += UserDisconnectedHandler;
+            chats.Broadcasted += BroadcastedHandler;
+            chats.UserBroadcasted += UserBroadcastedHandler;
+            chats.Whispered += WhisperedHandler;
+            chats.UserWhispered += UserWhisperedHandler;
+
+            UpdateTitle();
         }
 
-        #region IChatServiceCallback members
+        #region Connection event handlers
 
-        public void OnConnect(DateTime dateTime, bool result, string message, string[] users) {
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, result ? Colors.OliveDrab : Colors.Red)));
+        private void ConnectionFailedHandler(object sender, DateTime dateTime, string message) {
+            dispatcher.Invoke(() => AppendText(dateTime, message, Colors.Red));
+            dispatcher.Invoke(() => UpdateTitle());
+        }
+
+        private void ConnectedHandler(object sender, bool result, DateTime dateTime, string message, string[] users) {
+            dispatcher.Invoke(() => AppendText(dateTime, message, result ? Colors.OliveDrab : Colors.Red));
             if (!result) {
-                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
                 return;
             }
-            _dispatcher.Invoke(new Action(() => AddUsers(users)));
-            _dispatcher.Invoke(new Action(() => AppendText(String.Format("There are currently {0} user(s) connected.", users.Length), Colors.OliveDrab)));
-            _dispatcher.Invoke(new Action(() => EnableDisconnect(true)));
-            _dispatcher.Invoke(new Action(() => EnableChat(true)));
+            dispatcher.Invoke(() => UpdateTitle());
+            dispatcher.Invoke(() => AddUsers(users));
+            dispatcher.Invoke(() => AppendText(string.Format("There are currently {0} user(s) connected.", users.Length), Colors.OliveDrab));
         }
 
-        public void OnDisconnect(DateTime dateTime, bool result, string message) {
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red)));
-            if (!result) return;
-            _dispatcher.Invoke(new Action(() => RemoveUser(userNameTextBox.Text)));
-            _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-        }
-
-        public void OnUserConnect(DateTime dateTime, string user, string message) {
-            _dispatcher.Invoke(new Action(() => AddUser(user)));
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, Colors.OliveDrab)));
-        }
-
-        public void OnUserDisconnect(DateTime dateTime, string user, string message) {
-            _dispatcher.Invoke(new Action(() => RemoveUser(user)));
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, Colors.Orange)));
-        }
-
-        public void OnBroadcast(DateTime dateTime, bool result, string resultMessage, string sentMessage) {
-            if (result) {
-                // Ignore the result message (probably unnecessary information)
-                // Just output what was sent
-                _dispatcher.Invoke(new Action(() => AppendText(dateTime, "You", "say", sentMessage)));
+        private void DisconnectedHandler(object sender, bool result, DateTime dateTime, string message) {
+            if (dispatcher.HasShutdownStarted) {
                 return;
             }
-
-            // Display the error message
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, resultMessage, Colors.Red)));
+            dispatcher.Invoke(() => AppendText(dateTime, message, result ? Colors.Orange : Colors.Red));
+            dispatcher.Invoke(() => UpdateTitle());
+            dispatcher.Invoke(() => RemoveUsers());
         }
 
-        public void OnWhisper(DateTime dateTime, bool result, string resultMessage, string toUser, string sentMessage) {
-            if (result) {
-                // Ignore the result message (probably unnecessary information)
-                // Just output what was sent
-                _dispatcher.Invoke(new Action(() => AppendText(dateTime, "You", String.Format("whisper to {0}", toUser), sentMessage, Colors.BlueViolet)));
-                return;
-            }
-
-            // Display the error message
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, resultMessage, Colors.Red)));
+        private void UserConnectedHandler(object sender, DateTime dateTime, string user, string message) {
+            dispatcher.Invoke(() => AddUsers(user));
+            dispatcher.Invoke(() => AppendText(dateTime, message, Colors.OliveDrab));
         }
 
-        public void OnUserBroadcast(DateTime dateTime, string fromUser, string message) {
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, fromUser, "says", message)));
+        private void UserDisconnectedHandler(object sender, DateTime dateTime, string user, string message) {
+            dispatcher.Invoke(() => RemoveUser(user));
+            dispatcher.Invoke(() => AppendText(dateTime, message, Colors.Orange));
         }
 
-        public void OnUserWhisper(DateTime dateTime, string fromUser, string message) {
+        private void BroadcastedHandler(object sender, DateTime dateTime, string message) {
+            // Just output what was sent
+            dispatcher.Invoke(() => AppendText(dateTime, "You", "say", message));
+        }
+
+        private void UserBroadcastedHandler(object sender, DateTime dateTime, string user, string message) {
+            dispatcher.Invoke(() => AppendText(dateTime, user, "says", message));
+        }
+
+        private void WhisperedHandler(object sender, DateTime dateTime, string user, string message) {
+            // Just output what was sent
+            dispatcher.Invoke(() => AppendText(dateTime, "You", string.Format("whisper to {0}", user), message, Colors.BlueViolet));
+        }
+
+        private void UserWhisperedHandler(object sender, DateTime dateTime, string user, string message) {
             // Update the user name to quick respond to through "/r "
-            _respondToUser = fromUser;
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, fromUser, "whispers", message, Colors.BlueViolet)));
-        }
-
-        public void OnKeepAlive(DateTime dateTime, bool result, string message) {
-            // Restart the keep alive timer
-            _keepAliveTimer.Start();
-
-            // No need to show the successful keep alive to the user.
-            if (result) return;
-
-            // Disable chat.
-            _dispatcher.Invoke(new Action(() => EnableChat(false)));
-
-            // Display the error message.
-            _dispatcher.Invoke(new Action(() => AppendText(dateTime, message, Colors.Red)));
-
-            // Enable the user to reconnect.
-            _dispatcher.Invoke(new Action(() => EnableConnect(true)));
+            respondToUser = user;
+            dispatcher.Invoke(() => AppendText(dateTime, user, "whispers", message, Colors.BlueViolet));
         }
 
         #endregion
 
-        #region GUI event delegates
+        #region GUI event handlers
+
+        private void DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
+            // Do nothing.
+        }
 
         private void WindowLoaded(object sender, RoutedEventArgs e) {
-            EnableConnect(true);
+            Help();
+
+            messageTextBox.Focus();
+            messageTextBox.SelectAll();
         }
 
-        private void WindowClosing(object sender, System.ComponentModel.CancelEventArgs e) {
-            if (disconnectButton.IsEnabled) {
-                EnableDisconnect(false);
-                EnableChat(false);
-                Disconnect();
+        private void WindowClosing(object sender, CancelEventArgs e) {
+            if (chats.IsConnected) {
+                chats.Disconnect();
             }
-            _chatClient = null;
-        }
 
-        private void ConnectButtonClick(object sender, RoutedEventArgs e) {
-            var username = userNameTextBox.Text;
-            var hostname = hostNameTextBox.Text;
-            if (String.IsNullOrWhiteSpace(username) || username.Contains(" ")) {
-                AppendText("Please enter a valid username and try to connect again.", Colors.Red);
-                EnableConnect(true);
-                return;
-            }
-            if (String.IsNullOrWhiteSpace(hostname) || hostname.Contains(" ")) {
-                AppendText("Please enter a valid hostname or IP.", Colors.Red);
-                EnableConnect(true);
-                return;
-            }
-            EnableConnect(false);
-            ThreadPool.QueueUserWorkItem(delegate { Connect(username, hostname); });
-        }
-
-        private void DisconnectButtonClick(object sender, RoutedEventArgs e) {
-            EnableDisconnect(false);
-            EnableChat(false);
-            ThreadPool.QueueUserWorkItem(delegate { Disconnect(); });
-        }
-
-        private void SendButtonClick(object sender, RoutedEventArgs e) {
-            var message = messageTextBox.Text;
-            _messageHistory.Insert(1, message);
-            _messageHistoryIndex = 0;
-            messageTextBox.Text = String.Empty;
-            message = message.Trim();
-            if (String.IsNullOrEmpty(message) || String.IsNullOrWhiteSpace(message)) {
-                AppendText("Please enter a valid message.", Colors.Red);
-                EnableChat(true);
-                return;
-            }
-            var name = userNameTextBox.Text;
-            ThreadPool.QueueUserWorkItem(delegate { Send(name, message); });
+            // Abort pending work in the queue
+            dispatcher.InvokeShutdown();
         }
 
         private void UserListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e) {
             var listBoxItem = GetElementFromPoint(userListBox, e.GetPosition(userListBox)) as ListBoxItem;
-            if (listBoxItem == null) return;
+            if (listBoxItem == null) {
+                return;
+            }
 
-            if (listBoxItem.Content.Equals(userNameTextBox.Text)) {
+            if (listBoxItem.Content.Equals(chats.User)) {
                 AppendText("There is no need to whisper to yourself.", Colors.Red);
                 return;
             }
 
-            messageTextBox.Text = String.Empty;
-            messageTextBox.Text += String.Format("/w {0} ", listBoxItem.Content);
+            messageTextBox.Text = string.Empty;
+            messageTextBox.Text += string.Format("/w {0} ", listBoxItem.Content);
             messageTextBox.CaretIndex = messageTextBox.Text.Length;
             messageTextBox.Focus();
         }
@@ -211,20 +174,34 @@ namespace FreddiChatClient {
                 case Key.Down:
                     UpdateMessageTextFromHistory(-1);
                     break;
+                case Key.Enter:
+                    HandleMessageTextBoxInput();
+                    break;
             }
         }
 
         private void AboutMenuItemClick(object sender, RoutedEventArgs e) {
-           this.ShowMessageAsync("About FreddiChat", "FreddiChat is a simple chat client written in C# using WPF (client) and WCF (client, server). FreddiChat is written by FreddieBoi. See the LICENSE file for license rights and limitations (BEER-WARE).");
+            var title = string.Format("About {0} {1}", applicationName, applicationVersionName);
+            var message = string.Format("{0} {1}{2}{2}A simple chat client and server solution written in C# using WCF (client, server) and WPF (client) by FreddieBoi.",
+                applicationName,
+                applicationVersionVerboseName,
+                Environment.NewLine);
+            this.ShowMessageAsync(title, message);
         }
 
         private void MessageTextBoxTextChanged(object sender, TextChangedEventArgs e) {
             var text = messageTextBox.Text.ToLower();
             // Do we have a user to quick respond to? And should we?
-            if (_respondToUser != null && (text.Contains("/r ") || text.Contains("/respond "))) {
-                var respondToString = String.Format("/w {0} ", _respondToUser);
+            if (respondToUser != null && (text.Contains("/r ") || text.Contains("/respond "))) {
+                var respondToString = string.Format("/w {0} ", respondToUser);
                 messageTextBox.Text = messageTextBox.Text.Replace("/r ", respondToString).Replace("/R ", respondToString).Replace("/respond ", respondToString);
                 messageTextBox.CaretIndex = messageTextBox.Text.Length;
+            }
+        }
+
+        private void LinkRequestNavigate(object sender, RequestNavigateEventArgs e) {
+            if (e.Uri != null) {
+                Process.Start(new ProcessStartInfo(e.Uri.ToString()));
             }
         }
 
@@ -232,9 +209,176 @@ namespace FreddiChatClient {
 
         #region Private helpers
 
+        #region Commands
+
+        private void HandleCommandOrMessage(string message) {
+            try {
+                // Is it a command?
+                if (message.StartsWith("/")) {
+                    var command = message.Remove(0, 1).ToLower();
+
+                    // Special handling of commands with arguments
+                    if (command.StartsWith("w") || command.StartsWith("whipser")) {
+                        Whisper(message);
+                        return;
+                    }
+                    if (command.StartsWith("connect")) {
+                        Connect(message);
+                        return;
+                    }
+
+                    // Handle all commands without arguments
+                    switch (command) {
+                        case "clear":
+                            dispatcher.Invoke(ClearText);
+                            return;
+                        case "disconnect":
+                            Disconnect();
+                            return;
+                        case "?":
+                        case "h":
+                        case "help":
+                            dispatcher.Invoke(Help);
+                            return;
+                        case "q":
+                        case "quit":
+                        case "exit":
+                            dispatcher.Invoke(Close);
+                            return;
+                        default:
+                            dispatcher.Invoke(() => AppendText("Invalid command.", Colors.Red));
+                            goto case "help";
+                    }
+                }
+            } catch {
+                dispatcher.Invoke(() => AppendText("Invalid command syntax.", Colors.Red));
+                dispatcher.Invoke(Help);
+            }
+
+            // Just regular broadcast chat...
+            Broadcast(message);
+        }
+
+        private void Help() {
+            AppendText(string.Format("{0} {1}", applicationName, applicationVersionVerboseName), Colors.CadetBlue);
+            AppendText("General:\t/h[elp], /q[uit]", Colors.CadetBlue);
+            AppendText("Connection:\t/connect user [protocol://]host[:port], /disconnect", Colors.CadetBlue);
+            AppendText("Chat:\t/clear, /r[eply], /w[hisper] user message", Colors.CadetBlue);
+        }
+
+        private void Connect(string message) {
+            try {
+                // Split into 3 substrings on ' ' (space).
+                // eg. "/connect User http://localhost:8080/FreddiChat" splits to "/connect", "User" and "http://localhost:8080/FreddiChat".
+                var words = message.Split(new[] { ' ' }, 3);
+                var user = words[1];
+                var host = words[2];
+
+                if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(host)) {
+                    // Bad format
+                    dispatcher.Invoke(() => AppendText("Invalid connect command, please use: /connect user [protocol://]host[:port]", Colors.Red));
+                    return;
+                }
+
+                if (chats.IsConnected) {
+                    dispatcher.Invoke(() => AppendText("Please disconnect before trying to connect again.", Colors.Red));
+                    return;
+                }
+
+                // Send the whisper message.
+                chats.Connect(user, host);
+
+                dispatcher.Invoke(() => AppendText(string.Format("Connecting to {0} as {1}...", chats.Host, chats.User), Colors.CadetBlue));
+            } catch {
+                dispatcher.Invoke(() => AppendText("Invalid connect command, please use: /connect user [protocol://]host[:port]", Colors.Red));
+            }
+        }
+
+        private void Disconnect() {
+            if (!chats.IsConnected) {
+                dispatcher.Invoke(() => AppendText("Please connect before trying to disconnect.", Colors.Red));
+                return;
+            }
+            chats.Disconnect();
+        }
+
+        private void Broadcast(string message) {
+            if (!chats.IsConnected) {
+                dispatcher.Invoke(() => AppendText("Please connect before trying to broadcast.", Colors.Red));
+                return;
+            }
+            try {
+                // Broadcast instead
+                chats.Broadcast(message);
+            } catch (Exception e) {
+                dispatcher.Invoke(() => AppendText(string.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red));
+            }
+        }
+
+        private void Whisper(string message) {
+            try {
+                // Split into 3 substrings on ' ' (space).
+                // eg. "/w User This is a message" splits to "/w", "User" and "This is a message".
+                var words = message.Split(new[] { ' ' }, 3);
+                var toUser = words[1];
+                var whisperMessage = words[2];
+
+                if (string.IsNullOrEmpty(toUser) || string.IsNullOrEmpty(whisperMessage)) {
+                    // Bad format
+                    dispatcher.Invoke(() => AppendText("Invalid whisper command, please use: /w user message", Colors.Red));
+                    return;
+                }
+                if (toUser.Equals(chats.User)) {
+                    // The user is whispering to herself
+                    dispatcher.Invoke(() => AppendText("There is no need to whisper to yourself.", Colors.Red));
+                    return;
+                }
+
+                if (!chats.IsConnected) {
+                    dispatcher.Invoke(() => AppendText("Please connect before trying to whisper.", Colors.Red));
+                    return;
+                }
+
+                // Send the whisper message.
+                chats.Whisper(toUser, whisperMessage);
+            } catch {
+                dispatcher.Invoke(() => AppendText("Invalid whisper command, please use: /w user message", Colors.Red));
+            }
+        }
+
+        #endregion
+
+        private void UpdateTitle() {
+            Title = string.Format("{0} ({1})", applicationName, applicationVersionName);
+            if (chats.IsConnected) {
+                Title += string.Format(" - {0}@{1}", chats.User, chats.Host);
+            }
+        }
+
+        private void HandleMessageTextBoxInput() {
+            var message = messageTextBox.Text;
+            messageHistory.Insert(1, message);
+            messageHistoryIndex = 0;
+            messageTextBox.Text = string.Empty;
+            message = message.Trim();
+            if (string.IsNullOrEmpty(message) || string.IsNullOrWhiteSpace(message)) {
+                AppendText("Please enter a valid command or message.", Colors.Red);
+                return;
+            }
+
+            ThreadPool.QueueUserWorkItem(delegate {
+                HandleCommandOrMessage(message);
+            });
+        }
+
+        /// <summary>
+        /// Remove a users from the userListBox.
+        /// </summary>
         private void RemoveUser(string user) {
             var itemToRemove = userListBox.Items.Cast<ListBoxItem>().FirstOrDefault(item => item.Content.Equals(user));
-            if (itemToRemove == null) return;
+            if (itemToRemove == null) {
+                return;
+            }
             userListBox.Items.Remove(itemToRemove);
         }
 
@@ -248,122 +392,19 @@ namespace FreddiChatClient {
             }
         }
 
-        private void AddUser(string user) {
-            userListBox.Items.Add(new ListBoxItem { Content = user });
-        }
-
-        private void AddUsers(IEnumerable<string> users) {
+        /// <summary>
+        /// Add users to the userListBox.
+        /// </summary>
+        private void AddUsers(params string[] users) {
             foreach (var user in users.Where(user => !userListBox.Items.Contains(user))) {
-                AddUser(user);
+                userListBox.Items.Add(new ListBoxItem {
+                    Content = user
+                });
             }
         }
 
-        private void EnableConnect(bool enabled) {
-            if (enabled) {
-                userNameTextBox.Focus();
-                userNameTextBox.SelectAll();
-                _keepAliveTimer.Stop();
-            }
-            connectButton.IsDefault = enabled;
-            connectButton.IsEnabled = enabled;
-            userNameTextBox.IsEnabled = enabled;
-            hostNameTextBox.IsEnabled = enabled;
-            disconnectButton.Visibility = Visibility.Hidden;
-        }
-
-        private void EnableDisconnect(bool enabled) {
-            if (enabled) {
-                _keepAliveTimer.Start();
-            }
-            disconnectButton.IsEnabled = enabled;
-            disconnectButton.Visibility = Visibility.Visible;
-        }
-
-        private void Connect(string username, string hostname) {
-            try {
-                const string endpointConfigurationName = "NetNamedPipeBinding_IChatService";
-                var remoteAdress = String.Format("net.pipe://{0}/FreddiChat", hostname);
-                _chatClient = new ChatServiceClient(new InstanceContext(this), endpointConfigurationName, remoteAdress);
-                _chatClient.Open();
-                _chatClient.Connect(username);
-            } catch (Exception e) {
-                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                _dispatcher.Invoke(new Action(() => EnableChat(false)));
-                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
-            }
-        }
-
-        private void Disconnect() {
-            try {
-                _chatClient.Disconnect();
-                _chatClient.Close();
-            } catch (Exception e) {
-                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                _dispatcher.Invoke(new Action(() => EnableChat(false)));
-                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
-            }
-        }
-
-        private void EnableChat(bool enabled) {
-            sendButton.IsEnabled = enabled;
-            sendButton.IsDefault = enabled;
-            messageTextBox.IsEnabled = enabled;
-            if (enabled) {
-                messageTextBox.Focus();
-                messageTextBox.SelectAll();
-            } else {
-                messageTextBox.Text = String.Empty;
-                RemoveUsers();
-            }
-        }
-
-        private void Send(string name, string message) {
-            try {
-                // Is this a whisper message?
-                if (message.ToLower().StartsWith("/w ") || message.ToLower().StartsWith("/whisper ")) {
-                    try {
-                        // Split into 3 substrings on ' ' (space).
-                        // eg. "/w User This is a message" splits to "/w", "User" and "This is a message".
-                        var words = message.Split(new[] { ' ' }, 3);
-                        var toUser = words[1];
-                        var whisperMessage = words[2];
-
-                        // Are the fields still valid?
-                        if (String.IsNullOrEmpty(toUser) || String.IsNullOrEmpty(whisperMessage)) {
-                            _dispatcher.Invoke(new Action(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red)));
-                        }
-                            // Is the user whispering himself?
-                        else if (toUser.Equals(name)) {
-                            _dispatcher.Invoke(new Action(() => AppendText("There is no need to whisper to yourself.", Colors.Red)));
-                        }
-                            // Send the whisper message.
-                        else {
-                            try {
-                                _chatClient.Whisper(name, toUser, whisperMessage);
-                            } catch (Exception e) {
-                                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                                _dispatcher.Invoke(new Action(() => EnableChat(false)));
-                                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
-                            }
-                        }
-                        return;
-                    } catch (Exception) {
-                        _dispatcher.Invoke(new Action(() => AppendText("Bad format on whisper command, please use \"/w user message\".", Colors.Red)));
-                        return;
-                    }
-                }
-
-                // Broadcast instead
-                _chatClient.Broadcast(name, message);
-            } catch (Exception e) {
-                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", e.Message, e.InnerException != null ? e.InnerException.Message : ""), Colors.Red)));
-                _dispatcher.Invoke(new Action(() => EnableChat(false)));
-                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
-            }
+        private void ClearText() {
+            chatTextBox.Document.Blocks.Clear();
         }
 
         private void AppendText(string text, Color color) {
@@ -379,25 +420,52 @@ namespace FreddiChatClient {
         }
 
         private void AppendText(DateTime dateTime, string sender, string senderInfo, string text, Color color) {
-            // Create a textrange at the very end of the chat text box, extend the range with the new text.
-            var textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.Format("[{0}] ", dateTime) };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            // Create a textrange at the very end of the chat text box, extend the range with the new text
+            var timestampTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = string.Format("[{0}] ", dateTime)
+            };
+            // Colorize the timestamp
+            timestampTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            timestampTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.Format("{0}", sender) };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
-            // Make it bold.
-            textRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
+            var senderTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = string.Format("{0}", sender)
+            };
+            // Colorize the sender and make it bold
+            senderTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            senderTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Bold);
 
-            textRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) { Text = String.IsNullOrEmpty(senderInfo) ? String.Format(": {0}", text) : String.Format(" {0}: {1}", senderInfo, text) };
-            // Colorize the last added section.
-            textRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
-            // Make it normal
-            textRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+            var senderInfoTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = string.IsNullOrWhiteSpace(senderInfo) ? ": " : string.Format(" {0}: ", senderInfo)
+            };
+            // Colorize the sender info
+            senderInfoTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+            senderInfoTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
-            // Add a new line
-            chatTextBox.AppendText(Environment.NewLine);
+            // Try to extract URLs and make them clickable
+            foreach (var partialText in UrlExtractor.Extract(text)) {
+                if (partialText.Value != null) {
+                    var linkTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                        Text = partialText.Key
+                    };
+                    var link = new Hyperlink(linkTextRange.Start, linkTextRange.End);
+                    link.NavigateUri = partialText.Value;
+                    link.RequestNavigate += LinkRequestNavigate;
+                } else {
+                    var regularTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                        Text = partialText.Key
+                    };
+                    // Colorize the text
+                    regularTextRange.ApplyPropertyValue(TextElement.ForegroundProperty, new SolidColorBrush(color));
+                    regularTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
+                }
+            }
+
+            // Add a new line and reset styles
+            var resetTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
+                Text = Environment.NewLine
+            };
+            resetTextRange.ApplyPropertyValue(TextElement.FontWeightProperty, FontWeights.Normal);
 
             // Scroll to end of chat text if ScrollLock isn't on
             var scrollLock = (((ushort)GetKeyState(0x91)) & 0xffff) != 0;
@@ -421,29 +489,17 @@ namespace FreddiChatClient {
             }
         }
 
-        private void KeepAlive(object sender, EventArgs e) {
-            try {
-                _keepAliveTimer.Stop();
-                _chatClient.KeepAlive(userNameTextBox.Text);
-            } catch (Exception exception) {
-                _dispatcher.Invoke(new Action(() => AppendText(String.Format("Couldn't establish connection to server. {0} {1}", exception.Message, exception.InnerException != null ? exception.InnerException.Message : ""), Colors.Red)));
-                _dispatcher.Invoke(new Action(() => EnableChat(false)));
-                _dispatcher.Invoke(new Action(() => EnableConnect(true)));
-                _dispatcher.Invoke(new Action(() => EnableDisconnect(false)));
-            }
-        }
-
         private void UpdateMessageTextFromHistory(int direction) {
-            _messageHistoryIndex += direction;
+            messageHistoryIndex += direction;
 
-            // Wrap around to index 0, the String.Empty entry.
-            if (Math.Abs(_messageHistoryIndex) > _messageHistory.Count - 1) {
-                _messageHistoryIndex = 0;
+            // Wrap around to index 0, the string.Empty entry.
+            if (Math.Abs(messageHistoryIndex) > messageHistory.Count - 1) {
+                messageHistoryIndex = 0;
             }
 
             // Set the message to the history message (the message at |index|)
             // Using absolute will make both Up and Down keys work.
-            messageTextBox.Text = _messageHistory[Math.Abs(_messageHistoryIndex)];
+            messageTextBox.Text = messageHistory[Math.Abs(messageHistoryIndex)];
             messageTextBox.CaretIndex = messageTextBox.Text.Length;
         }
 

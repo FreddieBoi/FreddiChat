@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ServiceModel;
 
-namespace FreddieChatServer {
+namespace FreddieChatServer.Communications {
 
     public interface IChatCallbackContract {
 
