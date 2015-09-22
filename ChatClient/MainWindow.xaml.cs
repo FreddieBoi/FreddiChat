@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Threading;
 using System.Diagnostics;
 using FreddiChatClient.Utils;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace FreddiChatClient {
@@ -21,7 +22,7 @@ namespace FreddiChatClient {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow {
+    public partial class MainWindow : MetroWindow {
 
         #region Private fields
 
