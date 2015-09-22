@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ServiceModel;
 using System.Timers;
-using FreddieChatServer.Communications;
 using FreddieChatServer.Managers;
 using FreddieChatServer.Utils;
 
