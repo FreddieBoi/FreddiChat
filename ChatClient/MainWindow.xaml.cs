@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Threading;
 using System.Diagnostics;
 using FreddiChatClient.Utils;
+using System.Threading.Tasks;
 
 namespace FreddiChatClient {
 
@@ -51,7 +52,12 @@ namespace FreddiChatClient {
             InitializeComponent();
 
             dispatcher = Dispatcher.CurrentDispatcher;
-            dispatcher.UnhandledException += DispatcherUnhandledException;
+
+            // Ignore unhandled exceptions
+            Dispatcher.CurrentDispatcher.UnhandledException += CurrentDispatcherUnhandledException;
+            Application.Current.DispatcherUnhandledException += CurrentDispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerUnobservedTaskException;
 
             // Listen to chat events
             chats = new Chats(dispatcher);
@@ -128,7 +134,15 @@ namespace FreddiChatClient {
 
         #region GUI event handlers
 
-        private void DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
+        private void TaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e) {
+            // Do nothing.
+        }
+
+        private void CurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e) {
+            // Do nothing.
+        }
+
+        private void CurrentDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) {
             // Do nothing.
         }
 
@@ -146,6 +160,13 @@ namespace FreddiChatClient {
 
             // Abort pending work in the queue
             dispatcher.InvokeShutdown();
+        }
+
+        private void WindowClosed(object sender, EventArgs e) {
+            Dispatcher.CurrentDispatcher.UnhandledException -= CurrentDispatcherUnhandledException;
+            Application.Current.DispatcherUnhandledException -= CurrentDispatcherUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException -= CurrentDomainUnhandledException;
+            TaskScheduler.UnobservedTaskException -= TaskSchedulerUnobservedTaskException;
         }
 
         private void UserListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e) {

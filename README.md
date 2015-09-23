@@ -55,6 +55,9 @@ Follow the steps below to regenerate the service client.
 4. Start `Developer Command Prompt` for `Visual Studio`
 5. Execute `svcutil.exe /language:cs /noConfig /namespace:*,FreddiChatClient.Communications /out:FreddiChat\ChatClient\Communications\GeneratedChatServiceClient.cs net.pipe://localhost/FreddiChat/mex` to regenerate the service client
 
+### Debugging
+To prevent the `Visual Studio` debugger from breaking on `LoadFromContext occurred` and `NotMarshalable occurred`, disable the `Enable UI Debugging Tools for XAML` option in `Tools > Options > Debugging > General`.
+
 Build status
 ------------
 [![Build status](https://ci.appveyor.com/api/projects/status/ucsjr4p7011d6sve?svg=true)](https://ci.appveyor.com/project/FreddieBoi/freddichat)

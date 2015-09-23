@@ -4,7 +4,7 @@
         xmlns:FreddiChatClient="clr-namespace:FreddiChatClient"
         Title="{Binding Title}" Height="600" Width="800" 
         Closing="WindowClosing" Loaded="WindowLoaded"
-        ResizeMode="CanMinimize">
+        ResizeMode="CanMinimize" Closed="WindowClosed">
     <Grid>
         <Menu IsMainMenu="True" VerticalAlignment="Top">
             <MenuItem Header="_File" >
