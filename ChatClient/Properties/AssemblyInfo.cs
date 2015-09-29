@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("FreddiChatClient")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("FreddiWare")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("FreddiChatClient")]
 [assembly: AssemblyCopyright("Written by FreddieBoi. See the LICENSE file for license rights and limitations (BEER-WARE).")]
 [assembly: AssemblyTrademark("")]
