@@ -1,6 +1,8 @@
 *suo
 *Resharper*
 *.DotSettings.*
+.vs
+*.user
 
 # Build Folders
 bin

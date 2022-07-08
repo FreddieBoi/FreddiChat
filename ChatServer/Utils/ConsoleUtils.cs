@@ -169,9 +169,7 @@ namespace FreddieChatServer.Utils {
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("{0}:", info);
             Console.Write("> ");
-
-            var command = string.Empty;
-            command = Console.ReadLine();
+            string command = Console.ReadLine();
 
             Console.ResetColor();
             return command.ToLower();

@@ -47,8 +47,8 @@ namespace FreddieChatServer.Managers {
         /// </summary>
         public CommunicationState? State {
             get {
-                var communication = Callback as ICommunicationObject;
-                if (communication == null) {
+                if (!(Callback is ICommunicationObject communication))
+                {
                     return null;
                 }
                 return communication.State;
@@ -69,7 +69,7 @@ namespace FreddieChatServer.Managers {
         }
 
         public override string ToString() {
-            return this.Name;
+            return Name;
         }
 
     }
@@ -103,8 +103,7 @@ namespace FreddieChatServer.Managers {
         public static User Current {
             get {
                 var callback = OperationContext.Current.GetCallbackChannel<IChatCallbackContract>();
-                User registeredUser;
-                return registeredUsers.TryGetValue(callback, out registeredUser) ? registeredUser : new User(callback, null, false, null);
+                return registeredUsers.TryGetValue(callback, out User registeredUser) ? registeredUser : new User(callback, null, false, null);
             }
         }
 
@@ -169,8 +168,8 @@ namespace FreddieChatServer.Managers {
                 (u.AliveAt.HasValue && u.AliveAt.Value.AddMinutes(timeoutMinutes) < now));
         }
 
-    #endregion
-
     }
+
+    #endregion
 
 }

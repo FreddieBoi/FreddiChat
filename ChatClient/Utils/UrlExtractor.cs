@@ -33,8 +33,7 @@ namespace FreddiChatClient.Utils {
                 if (url.StartsWith("www")) {
                     url = string.Format("http://{0}", url);
                 }
-                Uri uri;
-                TryCreate(url, out uri, validChatUriSchemes);
+                TryCreate(url, out Uri uri, validChatUriSchemes);
                 extracted.Add(new KeyValuePair<string, Uri>(url, uri));
 
                 lastMatchIndex = match.Index + match.Length;

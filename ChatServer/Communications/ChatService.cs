@@ -40,7 +40,7 @@ namespace FreddieChatServer.Communications {
             }
 
             if (users.IsNameRegistered(user)) {
-                var error = String.Format("Could not connect as {0}. A user with that name already exists!", user);
+                var error = string.Format("Could not connect as {0}. A user with that name already exists!", user);
                 ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
                 currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
                 return;
@@ -48,7 +48,7 @@ namespace FreddieChatServer.Communications {
 
             if (currentUser.State == null || currentUser.State != CommunicationState.Opened) {
                 var state = currentUser.State == null ? "not initialized" : currentUser.State.ToString().ToLower();
-                var error = String.Format("Could not connect. Connection not properly opened (connection {0}).", state);
+                var error = string.Format("Could not connect. Connection not properly opened (connection {0}).", state);
                 ConsoleUtils.TraceCallFailure(currentUser, "OnConnect(false, {0}, null)", error);
                 currentUser.Callback.OnConnect(DateTime.Now, false, error, null);
                 return;
@@ -63,12 +63,12 @@ namespace FreddieChatServer.Communications {
                 return;
             }
 
-            var message = String.Format("Successfully connected as {0}.", user);
+            var message = string.Format("Successfully connected as {0}.", user);
             ConsoleUtils.TraceCallSuccess(currentUser, "OnConnect(true, {0}, string[{1}])", message, users.Count);
             currentUser.Callback.OnConnect(DateTime.Now, true, message, users.GetRegisteredNames());
 
             foreach (var other in users.GetUsersToNotify(currentUser)) {
-                var notification = String.Format("{0} connected.", user);
+                var notification = string.Format("{0} connected.", user);
                 ConsoleUtils.TraceNotificationSuccess(currentUser, "OnUserConnect({0}, {1}) to {2}", user, notification, other.Name);
 
                 other.Callback.OnUserConnect(DateTime.Now, user, notification);
@@ -85,7 +85,7 @@ namespace FreddieChatServer.Communications {
             // Can this user disconnect?
             if (!currentUser.IsRegistered) {
                 // Log it
-                var error = String.Format("Could not disconnect. Probably already disconnected.");
+                var error = string.Format("Could not disconnect. Probably already disconnected.");
                 ConsoleUtils.TraceCallFailure(currentUser, "OnDisconnect(false, {0})", error);
 
                 // Notify client
@@ -97,7 +97,7 @@ namespace FreddieChatServer.Communications {
             currentUser = users.Unregister(currentUser);
 
             // Log
-            var message = String.Format("Successfully disconnected.");
+            var message = string.Format("Successfully disconnected.");
             ConsoleUtils.TraceCallWarning(currentUser, "OnDisconnect(true, {0})", message);
 
             // Notify client
@@ -106,7 +106,7 @@ namespace FreddieChatServer.Communications {
             // Notify all other clients
             foreach (var otherUser in users.GetUsersToNotify(currentUser)) {
                 // Log
-                var notification = String.Format("{0} disconnected.", currentUser.Name);
+                var notification = string.Format("{0} disconnected.", currentUser.Name);
                 ConsoleUtils.TraceNotificationWarning(otherUser, "OnUserDisconnect({0}, {1})", currentUser.Name, notification);
 
                 // Notify the other user
@@ -173,7 +173,7 @@ namespace FreddieChatServer.Communications {
             var otherUser = users.GetUser(toUser);
             if (otherUser == null) {
                 // Something is wrong here... Log
-                var errorMessage = String.Format("There is no user named {0}.", toUser);
+                var errorMessage = string.Format("There is no user named {0}.", toUser);
                 ConsoleUtils.TraceCallFailure(currentUser, "OnWhisper(false, {0}, {1}, null)", errorMessage, toUser);
 
                 // Notify client
@@ -184,7 +184,7 @@ namespace FreddieChatServer.Communications {
             // Is the fromUser whispering to self?
             if (toUser.Equals(fromUser)) {
                 // Something is wrong here... Log
-                var errorMessage = String.Format("There is no need to whisper to yourself.");
+                var errorMessage = string.Format("There is no need to whisper to yourself.");
                 ConsoleUtils.TraceCallFailure(currentUser, "OnWhisper(false, {0}, {1}, null)", errorMessage, toUser);
 
                 // Notify client
@@ -196,7 +196,7 @@ namespace FreddieChatServer.Communications {
             message = message.Trim();
 
             // Log
-            var resultMessage = String.Format("Successfully whispered to {0}.", toUser);
+            var resultMessage = string.Format("Successfully whispered to {0}.", toUser);
             ConsoleUtils.TraceCallWhisper(currentUser, "OnWhisper(true, {0}, {1}, {2})", resultMessage, toUser, message);
 
             // Notify sending client
@@ -262,7 +262,7 @@ namespace FreddieChatServer.Communications {
 
                 // Notify other users
                 foreach (var otherUser in users.GetUsersToNotify(user)) {
-                    var message = String.Format("{0} disconnected due to {1} (connection {2}).", user.Name, reason, state);
+                    var message = string.Format("{0} disconnected due to {1} (connection {2}).", user.Name, reason, state);
 
                     // Log
                     ConsoleUtils.TraceNotificationWarning(otherUser, "OnUserDisconnect({0}, {1})", user.Name, message);

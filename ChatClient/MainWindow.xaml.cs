@@ -170,8 +170,7 @@ namespace FreddiChatClient {
         }
 
         private void UserListBoxMouseDoubleClick(object sender, MouseButtonEventArgs e) {
-            var listBoxItem = GetElementFromPoint(userListBox, e.GetPosition(userListBox)) as ListBoxItem;
-            if (listBoxItem == null) {
+            if (!(GetElementFromPoint(userListBox, e.GetPosition(userListBox)) is ListBoxItem listBoxItem)) {
                 return;
             }
 
@@ -473,8 +472,9 @@ namespace FreddiChatClient {
                     var linkTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {
                         Text = partialText.Key
                     };
-                    var link = new Hyperlink(linkTextRange.Start, linkTextRange.End);
-                    link.NavigateUri = partialText.Value;
+                    var link = new Hyperlink(linkTextRange.Start, linkTextRange.End) {
+                        NavigateUri = partialText.Value
+                    };
                     link.RequestNavigate += LinkRequestNavigate;
                 } else {
                     var regularTextRange = new TextRange(chatTextBox.Document.ContentEnd, chatTextBox.Document.ContentEnd) {

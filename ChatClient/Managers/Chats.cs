@@ -60,7 +60,7 @@ namespace FreddiChatClient {
 
         public bool IsConnected {
             get {
-                return this.client != null && client.State == CommunicationState.Opened;
+                return client != null && client.State == CommunicationState.Opened;
             }
         }
 
@@ -85,8 +85,7 @@ namespace FreddiChatClient {
             Host = host;
 
             // Validate host
-            Uri uri;
-            UrlExtractor.TryCreate(Host, out uri, validHostUriSchemes);
+            UrlExtractor.TryCreate(Host, out Uri uri, validHostUriSchemes);
             if (uri == null) {
                 ConnectionFailed(this, DateTime.Now, string.Format("Invalid format for host: {0}", Host));
                 return;
