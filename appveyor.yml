@@ -1,5 +1,0 @@
-version: 0.1.{branch}.{build}
-install:
-  - nuget restore
-build:
-  verbosity: minimal
